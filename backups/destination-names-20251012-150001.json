@@ -1,0 +1,42 @@
+{
+  "generatedAt": "2025-10-12T09:30:01.268Z",
+  "count": 9,
+  "names": [
+    {
+      "name": "Sirsi",
+      "slug": "sirsi"
+    },
+    {
+      "name": "Mysuru",
+      "slug": "mysuru-karnataka"
+    },
+    {
+      "name": "Udupi",
+      "slug": "udupi"
+    },
+    {
+      "name": "Tirupati",
+      "slug": "tirupati"
+    },
+    {
+      "name": "Rameswaram",
+      "slug": "rameshwaram"
+    },
+    {
+      "name": "Gokarna",
+      "slug": "gokarna"
+    },
+    {
+      "name": "581355",
+      "slug": "581355"
+    },
+    {
+      "name": "Siddapur",
+      "slug": "siddapur"
+    },
+    {
+      "name": "Shivamogga",
+      "slug": "shivamogga"
+    }
+  ]
+}

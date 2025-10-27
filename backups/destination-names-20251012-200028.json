@@ -1,0 +1,30 @@
+{
+  "generatedAt": "2025-10-12T14:30:28.317Z",
+  "count": 6,
+  "names": [
+    {
+      "name": "Mysuru",
+      "slug": "mysuru-karnataka"
+    },
+    {
+      "name": "Hubli",
+      "slug": "hubli"
+    },
+    {
+      "name": "Sirsi",
+      "slug": "sirsi"
+    },
+    {
+      "name": "Bengaluru",
+      "slug": "bengaluru"
+    },
+    {
+      "name": "Shivamogga",
+      "slug": "shivamogga"
+    },
+    {
+      "name": "Sagar",
+      "slug": "sagar"
+    }
+  ]
+}

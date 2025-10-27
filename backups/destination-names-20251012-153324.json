@@ -1,0 +1,38 @@
+{
+  "generatedAt": "2025-10-12T10:03:24.060Z",
+  "count": 8,
+  "names": [
+    {
+      "name": "Mysuru",
+      "slug": "mysuru-karnataka"
+    },
+    {
+      "name": "Sirsi",
+      "slug": "sirsi"
+    },
+    {
+      "name": "Mysuru",
+      "slug": "mysore"
+    },
+    {
+      "name": "Siddapura",
+      "slug": "siddapura"
+    },
+    {
+      "name": "Tirupati",
+      "slug": "tirupati"
+    },
+    {
+      "name": "Rameswaram",
+      "slug": "rameshwaram"
+    },
+    {
+      "name": "Bengaluru",
+      "slug": "bengaluru"
+    },
+    {
+      "name": "581356",
+      "slug": "581356"
+    }
+  ]
+}

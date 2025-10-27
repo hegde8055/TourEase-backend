@@ -1,0 +1,39 @@
+{
+  "name": "tourease",
+  "version": "1.0.0",
+  "description": "Tourist guide application",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "concurrently \"npm start\" \"cd client && npm start\"",
+    "client": "cd client && npm start",
+    "build": "cd client && npm run build",
+    "format": "prettier --write \"**/*.{js,json,md}\"",
+    "format:check": "prettier --check \"**/*.{js,json,md}\"",
+    "reset:destinations": "node scripts/resetDestinations.js"
+  },
+  "keywords": [
+    "tourism",
+    "travel",
+    "guide"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.6.7",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "joi": "^18.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.8.0",
+    "multer": "^1.4.5-lts.1",
+    "node-fetch": "^3.3.2",
+    "unsplash-js": "^7.0.20"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "prettier": "^3.6.2"
+  }
+}
