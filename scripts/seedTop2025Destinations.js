@@ -1,17 +1,18 @@
 /*
- * Seed script: Top 10 Indian destinations for 2025
+ * Seed script: Top 25 Indian destinations for 2025
  *
  * This script relies on the existing /api/destinations/ingest endpoint to fetch
  * Geoapify, Unsplash, and weather-backed data, then enriches each record with
- * curated copy sourced from the TravelTriangle "108 Must-Visit Destinations in India Before You Turn 30" list
- * (updated February 11, 2025).
+ * curated copy.
  *
  * Usage:
- *   1. Ensure the API server is running locally (default: http://localhost:5000).
- *   2. Set MONGODB_URI / DB_NAME in server/.env if they differ from defaults.
- *   3. From the repo root run: node server/scripts/seedTop2025Destinations.js
- *
- * The script is idempotent: repeated runs will refresh curated fields without duplicating documents.
+ * 1. Ensure your local .env file (server/.env) has all API keys:
+ * - MONGODB_URI (pointing to your Atlas cluster)
+ * - GEOAPIFY_API_KEY
+ * - UNSPLASH_ACCESS_KEY
+ * - OPENWEATHER_API_KEY
+ * 2. Ensure your local server is running (npm run start in /server)
+ * 3. From the repo root run: node server/scripts/seedTop2025Destinations.js
  */
 
 const path = require("path");
@@ -19,13 +20,22 @@ const axios = require("axios");
 const { MongoClient, ObjectId } = require("mongodb");
 require("dotenv").config({ path: path.join(__dirname, "..", ".env") });
 
-const SERVER_URL = process.env.SERVER_URL || "http://localhost:5000";
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017";
+// Make sure your local server is running on port 10000 (or change this)
+const SERVER_URL = process.env.SERVER_URL || "http://localhost:10000";
+const MONGODB_URI = process.env.MONGODB_URI;
 const DB_NAME = process.env.DB_NAME || "tourease";
+
+if (!MONGODB_URI) {
+  console.error(
+    "🚨 MONGODB_URI is not defined in your .env file. Point it to your MongoDB Atlas cluster."
+  );
+  process.exit(1);
+}
 
 const SOURCE_URL = "https://traveltriangle.com/blog/places-to-visit-in-india-before-you-turn-30/";
 
 const curatedDestinations = [
+  // Your Original Top 10
   {
     rank: 1,
     query: "Goa, India",
@@ -303,6 +313,422 @@ const curatedDestinations = [
     recommendedDuration: "3-4 days",
     tags: ["2025", "spiritual", "ganges", "culture"],
   },
+
+  // New 15 Destinations
+  {
+    rank: 11,
+    query: "Rishikesh, Uttarakhand",
+    category: "Adventure & Spirituality",
+    rating: 4.7,
+    bestTimeToVisit: "September to November & March to May",
+    entryFee: "Activities (rafting, bungee) priced individually",
+    summary:
+      "The 'Yoga Capital of the World' and a hub for white-water rafting, bridging spiritual ghats with thrilling Himalayan adventure.",
+    highlights: [
+      "White-water rafting on the Ganges (Rapids Grade I-IV)",
+      "Bungee jumping from India's highest platform",
+      "Attend the evening Ganga Aarti at Parmarth Niketan",
+    ],
+    nearbyAttractions: [
+      {
+        name: "Lakshman Jhula & Ram Jhula",
+        description: "Iconic suspension bridges offering panoramic views of the river and temples.",
+      },
+      {
+        name: "The Beatles Ashram",
+        description: "Explore the graffiti-covered ruins of the Maharishi Mahesh Yogi's ashram.",
+      },
+    ],
+    recommendedDuration: "3-5 days",
+    tags: ["2025", "adventure", "yoga", "spiritual", "ganges"],
+  },
+  {
+    rank: 12,
+    query: "Jaisalmer, Rajasthan",
+    category: "Desert Heritage",
+    rating: 4.6,
+    bestTimeToVisit: "October to March",
+    entryFee: "Fort entry free; Desert Safari from ₹1,500",
+    summary:
+      "A 'Golden City' rising from the Thar Desert, known for its living fort, ornate havelis, and magical desert safaris.",
+    highlights: [
+      "Camel safari to the Sam Sand Dunes for a sunset and cultural night",
+      "Explore the narrow lanes of the Jaisalmer Fort (a living fort)",
+      "Visit the intricately carved Patwon Ki Haveli",
+    ],
+    nearbyAttractions: [
+      {
+        name: "Gadisar Lake",
+        description:
+          "A serene artificial lake surrounded by temples and shrines, perfect for boating.",
+      },
+      {
+        name: "Kuldhara Village",
+        description: "An abandoned, haunted village with a mysterious history.",
+      },
+    ],
+    recommendedDuration: "3-4 days",
+    tags: ["2025", "desert", "rajasthan", "heritage", "forts"],
+  },
+  {
+    rank: 13,
+    query: "Udaipur, Rajasthan",
+    category: "Royal Lakes",
+    rating: 4.8,
+    bestTimeToVisit: "September to March",
+    entryFee: "City Palace entry ₹300",
+    summary:
+      "The 'City of Lakes,' famed for its romantic, shimmering lakes, opulent palaces, and vibrant arts scene.",
+    highlights: [
+      "Boat ride on Lake Pichola to see the Jag Mandir and Lake Palace",
+      "Tour the magnificent City Palace complex",
+      "Attend a traditional Rajasthani cultural show at Bagore Ki Haveli",
+    ],
+    nearbyAttractions: [
+      {
+        name: "Sajjangarh Monsoon Palace",
+        description: "A mountaintop palace offering breathtaking sunset views over the city.",
+      },
+      {
+        name: "Kumbhalgarh Fort",
+        description: "A UNESCO World Heritage Site with the second-longest wall in the world.",
+      },
+    ],
+    recommendedDuration: "3-4 days",
+    tags: ["2025", "lakes", "royal", "rajasthan", "romantic"],
+  },
+  {
+    rank: 14,
+    query: "Amritsar, Punjab",
+    category: "Spiritual & History",
+    rating: 4.9,
+    bestTimeToVisit: "October to March",
+    entryFee: "Golden Temple is free; Wagah Border ceremony is free",
+    summary:
+      "The spiritual heart of Sikhism, home to the magnificent Golden Temple and the patriotic energy of the Wagah Border.",
+    highlights: [
+      "Experience the serene beauty of the Golden Temple at dawn",
+      "Witness the high-energy Wagah Border closing ceremony",
+      "Visit the Jallianwala Bagh memorial",
+    ],
+    nearbyAttractions: [
+      {
+        name: "Partition Museum",
+        description: "The world's first museum dedicated to the 1947 Partition of India.",
+      },
+      {
+        name: "Gobindgarh Fort",
+        description: "A historic fort showcasing Punjabi culture, history, and cuisine.",
+      },
+    ],
+    recommendedDuration: "2-3 days",
+    tags: ["2025", "spiritual", "history", "punjab", "temples"],
+  },
+  {
+    rank: 15,
+    query: "Manali, Himachal Pradesh",
+    category: "Mountain Adventure",
+    rating: 4.5,
+    bestTimeToVisit: "May to July (Summer) & December to February (Snow)",
+    entryFee: "Permits required for Rohtang Pass",
+    summary:
+      "A high-altitude Himalayan resort town, serving as a gateway for adventure sports in Solang Valley and the journey to Ladakh.",
+    highlights: [
+      "Paragliding and skiing in Solang Valley",
+      "Drive to Rohtang Pass for snow-capped peaks (May-Oct)",
+      "Explore the cafes and markets of Old Manali",
+    ],
+    nearbyAttractions: [
+      {
+        name: "Hadimba Devi Temple",
+        description: "An ancient cave temple surrounded by a cedar forest.",
+      },
+      {
+        name: "Atal Tunnel",
+        description: "The world's longest highway tunnel above 10,000 feet.",
+      },
+    ],
+    recommendedDuration: "4-5 days",
+    tags: ["2025", "himalayas", "adventure", "mountains", "skiing"],
+  },
+  {
+    rank: 16,
+    query: "Munnar, Kerala",
+    category: "Tea Highlands",
+    rating: 4.7,
+    bestTimeToVisit: "September to March",
+    entryFee: "Tea gardens and parks entry ₹100-₹300",
+    summary:
+      "A breathtaking landscape of rolling hills carpeted in emerald-green tea plantations, mist, and cool mountain air.",
+    highlights: [
+      "Visit a tea factory to learn about tea processing",
+      "Hike to Top Station for views above the clouds",
+      "Spot the Nilgiri Tahr at Eravikulam National Park",
+    ],
+    nearbyAttractions: [
+      {
+        name: "Mattupetty Dam",
+        description: "A picturesque dam popular for boating and its surrounding tea gardens.",
+      },
+      {
+        name: "Kolukkumalai Tea Estate",
+        description:
+          "The world's highest organic tea plantation, accessible by a scenic jeep ride.",
+      },
+    ],
+    recommendedDuration: "3-4 days",
+    tags: ["2025", "tea", "kerala", "nature", "western ghats"],
+  },
+  {
+    rank: 17,
+    query: "Agra, Uttar Pradesh",
+    category: "Iconic Heritage",
+    rating: 4.8,
+    bestTimeToVisit: "October to March",
+    entryFee: "Taj Mahal entry ₹250 (Indians), ₹1300 (Foreigners)",
+    summary:
+      "Home to the world's most famous monument to love, the Taj Mahal, and a rich history of Mughal architecture.",
+    highlights: [
+      "Witness the Taj Mahal at sunrise or sunset",
+      "Explore the vast and historic Agra Fort (UNESCO)",
+      "Visit the exquisite tomb of Itmad-ud-Daulah (Baby Taj)",
+    ],
+    nearbyAttractions: [
+      {
+        name: "Fatehpur Sikri",
+        description: "A perfectly preserved 16th-century Mughal capital city, now a UNESCO site.",
+      },
+      {
+        name: "Mehtab Bagh (Moonlight Garden)",
+        description: "A garden across the river offering a serene, symmetrical view of the Taj.",
+      },
+    ],
+    recommendedDuration: "2 days",
+    tags: ["2025", "heritage", "unesco", "taj mahal", "mughal"],
+  },
+  {
+    rank: 18,
+    query: "Puducherry",
+    category: "French-Colonial Coast",
+    rating: 4.6,
+    bestTimeToVisit: "October to March",
+    entryFee: "Beaches and ashram are free",
+    summary:
+      "A quaint coastal town with a unique blend of French colonial heritage, spiritual ashrams, and Tamil culture.",
+    highlights: [
+      "Stroll through the bougainvillea-lined streets of the French Quarter (White Town)",
+      "Visit the Sri Aurobindo Ashram and the utopian city of Auroville",
+      "Relax on Promenade Beach and see the French War Memorial",
+    ],
+    nearbyAttractions: [
+      {
+        name: "Auroville Matrimandir",
+        description: "A golden spherical dome for silent concentration, the soul of the city.",
+      },
+      {
+        name: "Paradise Beach",
+        description: "A beautiful and clean beach accessible by a short boat ride.",
+      },
+    ],
+    recommendedDuration: "3-4 days",
+    tags: ["2025", "french", "coastal", "spiritual", "culture"],
+  },
+  {
+    rank: 19,
+    query: "Shillong, Meghalaya",
+    category: "Northeast Hills",
+    rating: 4.7,
+    bestTimeToVisit: "March to June & September to November",
+    entryFee: "Parks and waterfalls entry ₹20-₹100",
+    summary:
+      "The 'Scotland of the East,' known for its rolling hills, pine forests, vibrant music scene, and stunning waterfalls.",
+    highlights: [
+      "Boating on Umiam Lake (Barapani)",
+      "Visit Elephant Falls and Sweet Falls",
+      "Explore the cafes and live music venues",
+    ],
+    nearbyAttractions: [
+      {
+        name: "Cherrapunji (Sohra)",
+        description:
+          "Once the wettest place on Earth, famous for its living root bridges and caves.",
+      },
+      {
+        name: "Mawlynnong",
+        description: "Acclaimed as 'Asia's Cleanest Village' with a skywalk over the forest.",
+      },
+    ],
+    recommendedDuration: "4-5 days (including day trips)",
+    tags: ["2025", "northeast", "nature", "waterfalls", "music"],
+  },
+  {
+    rank: 20,
+    query: "Rann of Kutch, Gujarat",
+    category: "Unique Landscape",
+    rating: 4.8,
+    bestTimeToVisit: "November to February (during Rann Utsav)",
+    entryFee: "Permit required (approx. ₹100 per person)",
+    summary:
+      "A vast, surreal salt marsh in the Thar Desert that transforms into a white wonderland under the full moon.",
+    highlights: [
+      "Experience the Rann Utsav, a vibrant festival of music, culture, and crafts",
+      "Watch the sunset or moonrise over the endless white salt desert",
+      "Visit the highest point, Kalo Dungar (Black Hill), for a panoramic view",
+    ],
+    nearbyAttractions: [
+      {
+        name: "Dholavira",
+        description: "A UNESCO World Heritage Site, the ruins of an ancient Harappan city.",
+      },
+      {
+        name: "Mandvi Beach",
+        description: "A pristine beach with a historic 400-year-old shipbuilding yard.",
+      },
+    ],
+    recommendedDuration: "3-4 days",
+    tags: ["2025", "desert", "unique", "culture", "festival"],
+  },
+  {
+    rank: 21,
+    query: "Kolkata, West Bengal",
+    category: "Cultural Capital",
+    rating: 4.5,
+    bestTimeToVisit: "October to March",
+    entryFee: "Victoria Memorial entry ₹30",
+    summary:
+      "India's 'City of Joy,' a soulful city with colonial architecture, a rich literary history, and incredible street food.",
+    highlights: [
+      "Visit the iconic Victoria Memorial and Howrah Bridge",
+      "Explore the traditional potters' colony of Kumartuli",
+      "Savor street food like puchka, kathi rolls, and mishti doi",
+    ],
+    nearbyAttractions: [
+      {
+        name: "Sundarbans National Park",
+        description: "The world's largest mangrove forest, home to the Royal Bengal Tiger.",
+      },
+      {
+        name: "Dakshineswar Kali Temple",
+        description:
+          "A revered Hindu temple dedicated to Goddess Kali on the banks of the Hooghly.",
+      },
+    ],
+    recommendedDuration: "3-4 days",
+    tags: ["2025", "city", "culture", "food", "heritage"],
+  },
+  {
+    rank: 22,
+    query: "Ooty, Tamil Nadu",
+    category: "Hill Station",
+    rating: 4.4,
+    bestTimeToVisit: "March to June & September to November",
+    entryFee: "Botanical Gardens entry ₹30",
+    summary:
+      "The 'Queen of Hill Stations,' a popular colonial-era retreat known for its toy train, botanical gardens, and tea estates.",
+    highlights: [
+      "Ride the Nilgiri Mountain Railway (Toy Train), a UNESCO site",
+      "Explore the Government Botanical Gardens",
+      "Boating on Ooty Lake",
+    ],
+    nearbyAttractions: [
+      {
+        name: "Doddabetta Peak",
+        description:
+          "The highest peak in the Nilgiris, offering stunning views of the surrounding hills.",
+      },
+      {
+        name: "Coonoor",
+        description:
+          "A smaller, quieter hill station nearby, famous for Sim's Park and tea gardens.",
+      },
+    ],
+    recommendedDuration: "3-4 days",
+    tags: ["2025", "hill station", "tea", "colonial", "nature"],
+  },
+  {
+    rank: 23,
+    query: "Tirupati, Andhra Pradesh",
+    category: "Pilgrimage",
+    rating: 4.9,
+    bestTimeToVisit: "September to February",
+    entryFee: "Free darshan; Special entry (Seeghra) darshan ₹300",
+    summary:
+      "Home to the world-renowned Tirumala Venkateswara Temple, one of the richest and most visited pilgrimage sites on Earth.",
+    highlights: [
+      "Seek blessings at the Tirumala Venkateswara Temple",
+      "Visit the Sri Padmavathi Ammavari Temple",
+      "Take a holy dip in the Swami Pushkarini tank",
+    ],
+    nearbyAttractions: [
+      {
+        name: "Talakona Waterfalls",
+        description: "The highest waterfall in Andhra Pradesh, located in a scenic forest reserve.",
+      },
+      {
+        name: "Sri Kalyana Venkateswara Swamy Temple",
+        description:
+          "A historic temple in Srinivasa Mangapuram, visited by devotees before Tirumala.",
+      },
+    ],
+    recommendedDuration: "2-3 days",
+    tags: ["2025", "temples", "spiritual", "pilgrimage", "heritage"],
+  },
+  {
+    rank: 24,
+    query: "Khajuraho, Madhya Pradesh",
+    category: "UNESCO World Heritage",
+    rating: 4.7,
+    bestTimeToVisit: "October to March",
+    entryFee: "Western Group of Temples entry ₹40 (Indians), ₹600 (Foreigners)",
+    summary:
+      "World-famous for its stunning groups of temples, adorned with intricate and erotic rock carvings from the Chandela dynasty.",
+    highlights: [
+      "Explore the Western Group of Temples (UNESCO site)",
+      "Visit the Eastern and Southern Groups for Jain and other temples",
+      "Attend the sound and light show in the evening",
+    ],
+    nearbyAttractions: [
+      {
+        name: "Raneh Falls",
+        description:
+          "A dramatic canyon carved by the Ken River, often called the 'Grand Canyon of India'.",
+      },
+      {
+        name: "Panna National Park",
+        description: "A prominent tiger reserve, ideal for a wildlife safari.",
+      },
+    ],
+    recommendedDuration: "2-3 days",
+    tags: ["2025", "temples", "unesco", "architecture", "heritage"],
+  },
+  {
+    rank: 25,
+    query: "Hampi, Karnataka",
+    category: "UNESCO World Heritage",
+    rating: 4.8,
+    bestTimeToVisit: "November to February",
+    entryFee: "Vittala Temple complex entry ₹40 (Indians), ₹600 (Foreigners)",
+    summary:
+      "A vast, boulder-strewn landscape of ruins from the 14th-century Vijayanagara Empire, a captivating open-air museum.",
+    highlights: [
+      "Marvel at the Stone Chariot and musical pillars of Vittala Temple",
+      "Climb Matanga Hill for a panoramic sunrise over the ruins",
+      "Explore the Virupaksha Temple, which is still in active use",
+    ],
+    nearbyAttractions: [
+      {
+        name: "Anegundi",
+        description:
+          "An ancient, quieter village across the river, believed to be the monkey kingdom of Kishkindha.",
+      },
+      {
+        name: "Tungabhadra Dam",
+        description: "A large dam offering scenic views and a musical fountain show.",
+      },
+    ],
+    recommendedDuration: "3-4 days",
+    tags: ["2025", "unesco", "heritage", "ruins", "temples"],
+  },
 ];
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -311,10 +737,23 @@ async function main() {
   const client = new MongoClient(MONGODB_URI, { useUnifiedTopology: true });
   try {
     await client.connect();
-    console.log("✅ Connected to MongoDB");
+    console.log("✅ Connected to MongoDB Atlas");
 
     const db = client.db(DB_NAME);
     const destinationsCollection = db.collection("destinations");
+
+    // Before we start, make sure the local server is running
+    try {
+      await axios.get(`${SERVER_URL}/api/health`); // Assuming you have a /health endpoint
+      console.log(`✅ Connected to local server at ${SERVER_URL}`);
+    } catch (e) {
+      console.error(`🚨 CRITICAL: Cannot connect to your local server at ${SERVER_URL}.`);
+      console.error(
+        "Please start your local server (npm run start) in another terminal before running this script."
+      );
+      await client.close();
+      return;
+    }
 
     for (const destinationConfig of curatedDestinations) {
       console.log(`\n➡️  Processing #${destinationConfig.rank}: ${destinationConfig.query}`);
@@ -323,7 +762,7 @@ async function main() {
         const ingestResponse = await axios.post(
           `${SERVER_URL}/api/destinations/ingest`,
           { query: destinationConfig.query, force: true },
-          { timeout: 1000 * 60 * 2 }
+          { timeout: 1000 * 60 * 2 } // 2 minute timeout
         );
 
         const destination = ingestResponse.data?.destination;
@@ -373,9 +812,12 @@ async function main() {
         // Small delay to stay polite with upstream APIs
         await sleep(1500);
       } catch (error) {
-        const message =
-          error.response?.data?.error || error.message || "Unknown error during ingestion";
-        console.error(`   ❌ Failed to process ${destinationConfig.query}: ${message}`);
+        // === THIS IS THE FIX ===
+        // This will now print the FULL error details, helping us find the real problem.
+        console.error(
+          `   ❌ Failed to process ${destinationConfig.query}: `,
+          error.response ? error.response.data : error
+        );
       }
     }
 
