@@ -1,67 +1,49 @@
-// /server/routes/images.js
 const express = require("express");
 const router = express.Router();
-const jwt = require("jsonwebtoken");
-const { createApi } = require("unsplash-js");
+const NodeCache = require("node-cache");
+const { fetchUnsplashImage } = require("../utils/unsplash");
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
-const UNSPLASH_ACCESS_KEY = process.env.UNSPLASH_ACCESS_KEY;
+// Initialize cache:
+// stdTTL (Standard Time-To-Live): 86400 seconds = 1 day
+// checkperiod: 3600 seconds = 1 hour (how often to check for expired keys)
+const imageCache = new NodeCache({ stdTTL: 86400, checkperiod: 3600 });
 
-// Authentication middleware
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-
-  if (!token) {
-    return res.status(401).json({ error: "Access token required" });
-  }
-
-  jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) {
-      return res.status(403).json({ error: "Invalid or expired token" });
-    }
-    req.user = user;
-    next();
-  });
-};
-
-// Initialize Unsplash API client
-const unsplash = UNSPLASH_ACCESS_KEY ? createApi({ accessKey: UNSPLASH_ACCESS_KEY }) : null;
-
-// GET /api/images/destination - Fetch a hero image for a destination
-router.get("/destination", authenticateToken, async (req, res) => {
-  if (!unsplash) {
-    console.warn("UNSPLASH_ACCESS_KEY is not configured. Skipping image fetch.");
-    return res.json({ imageUrl: null });
-  }
-
-  const { query } = req.query;
-  if (!query) {
-    return res.status(400).json({ error: "A destination query is required." });
-  }
-
+/**
+ * @route   GET /api/images/destination/:name
+ * @desc    Get a hero image for a destination, using cache
+ * @access  Public (or add auth middleware if you prefer)
+ */
+router.get("/destination/:name", async (req, res) => {
   try {
-    const result = await unsplash.search.getPhotos({
-      query: `${query} India landscape`, // Add context for better results
-      page: 1,
-      perPage: 1,
-      orientation: "landscape",
-    });
-
-    if (result.errors) {
-      console.error("Unsplash API Error:", result.errors[0]);
-      return res.status(500).json({ error: "Failed to fetch image from provider." });
+    const destinationName = req.params.name;
+    if (!destinationName) {
+      return res.status(400).json({ error: "Destination name is required." });
     }
 
-    const photo = result.response?.results[0];
-    if (photo) {
-      res.json({ imageUrl: photo.urls.regular });
-    } else {
-      res.json({ imageUrl: null }); // No image found for the query
+    // Use a consistent cache key
+    const cacheKey = `hero_image_${destinationName.toLowerCase().trim()}`;
+
+    // 1. Check the cache
+    const cachedImageUrl = imageCache.get(cacheKey);
+
+    if (cachedImageUrl) {
+      // 2. Cache HIT: Return the cached URL immediately
+      console.log(`[Cache HIT] for destination: ${destinationName}`);
+      return res.json({ imageUrl: cachedImageUrl });
     }
+
+    // 3. Cache MISS: Fetch the image from the external API
+    console.log(`[Cache MISS] for destination: ${destinationName}`);
+    const newImageUrl = await fetchUnsplashImage(destinationName);
+
+    // 4. Store the new URL in the cache for next time
+    imageCache.set(cacheKey, newImageUrl);
+
+    // 5. Return the new URL
+    return res.json({ imageUrl: newImageUrl });
   } catch (error) {
-    console.error("Server error fetching destination image:", error);
-    res.status(500).json({ error: "An internal server error occurred." });
+    console.error("Error in image route:", error);
+    res.status(500).json({ error: "Server error fetching image." });
   }
 });
 
