@@ -1,7 +1,8 @@
 // /server/models/User.js
-const mongoose = require("mongoose");
-const Joi = require("joi");
+import mongoose from "mongoose";
+import Joi from "joi";
 
+// --- Mongoose Schema ---
 const userSchema = new mongoose.Schema(
   {
     username: {
@@ -62,6 +63,7 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+// --- Joi Validation Schemas ---
 const usernameSchema = Joi.string().min(3).max(30).trim();
 const emailSchema = Joi.string().trim().lowercase().email();
 const passwordSchema = Joi.string()
@@ -78,18 +80,14 @@ const signupSchema = Joi.object({
   password: passwordSchema.required(),
 });
 
-const validateSignup = (payload = {}) => signupSchema.validate(payload, { abortEarly: false });
+export const validateSignup = (payload = {}) =>
+  signupSchema.validate(payload, { abortEarly: false });
 
-const validatePasswordStrength = (password = "") => {
+export const validatePasswordStrength = (password = "") => {
   const { error } = passwordSchema.validate(password, { abortEarly: false });
   if (!error) return [];
   return error.details.map((detail) => detail.message);
 };
 
-const User = mongoose.model("User", userSchema);
-
-module.exports = {
-  User,
-  validateSignup,
-  validatePasswordStrength,
-};
+// --- Mongoose Model ---
+export const User = mongoose.model("User", userSchema);
