@@ -101,6 +101,57 @@ const callGroqPlan = async ({ prompt }) => {
   return sanitizeJsonText(text);
 };
 
+// ==========================================================
+// --- START OF NEW ROUTE (FIX) ---
+// This is the route your frontend (routingUtils.js) is trying to call.
+// ==========================================================
+router.post("/calculate-route", authenticateToken, async (req, res) => {
+  const { waypoints, mode = "drive" } = req.body;
+
+  if (!waypoints || !Array.isArray(waypoints) || waypoints.length < 2) {
+    return res.status(400).json({ error: "Invalid waypoints array" });
+  }
+
+  if (!GEOAPIFY_KEY) {
+    console.error("GEOAPIFY_KEY is not set for /calculate-route");
+    return res.status(503).json({ error: "Routing service is not configured" });
+  }
+
+  try {
+    const fetch = await ensureFetch();
+    const url = new URL("https://api.geoapify.com/v1/routing");
+
+    // Format waypoints for Geoapify: lat,lng|lat,lng
+    const waypointString = waypoints.map((wp) => `${wp.lat},${wp.lng}`).join("|");
+
+    url.searchParams.set("waypoints", waypointString);
+    url.searchParams.set("mode", mode);
+    url.searchParams.set("apiKey", GEOAPIFY_KEY);
+    // You can add more details if you want, e.g.:
+    // url.searchParams.set("details", "route_details");
+
+    const routeResponse = await fetch(url.href);
+
+    if (!routeResponse.ok) {
+      const errorText = await routeResponse.text();
+      console.error("Geoapify API Error:", errorText);
+      return res
+        .status(routeResponse.status)
+        .json({ error: "Failed to fetch route from provider" });
+    }
+
+    // Pass the raw JSON data from Geoapify directly to the frontend
+    const routeData = await routeResponse.json();
+    res.json(routeData);
+  } catch (error) {
+    console.error("Route calculation error:", error);
+    res.status(500).json({ error: "Server error during route calculation" });
+  }
+});
+// ==========================================================
+// --- END OF NEW ROUTE (FIX) ---
+// ==========================================================
+
 // POST /api/itinerary/ai/plan - Generate AI plan using Groq
 router.post("/ai/plan", authenticateToken, async (req, res) => {
   try {
@@ -551,64 +602,6 @@ router.get("/stats/summary", authenticateToken, async (req, res) => {
       error: "Failed to fetch statistics",
       details: error.message,
     });
-  }
-});
-// POST /api/itinerary/calculate-route - Return full route geometry for map highlight
-router.post("/calculate-route", async (req, res) => {
-  try {
-    const { waypoints = [], mode = "drive" } = req.body || {};
-    const GEOAPIFY_KEY =
-      process.env.GEOAPIFY_PLACES_API_KEY ||
-      process.env.GEOAPIFY_STATIC_MAP_API_KEY ||
-      process.env.GEOAPIFY_API_KEY;
-
-    if (!GEOAPIFY_KEY) {
-      return res.status(503).json({ error: "Geoapify API key not configured on the server." });
-    }
-
-    if (!Array.isArray(waypoints) || waypoints.length < 2) {
-      return res.status(400).json({ error: "At least 2 waypoints are required." });
-    }
-
-    const formatted = waypoints.map((p) => `${p.lat},${p.lng}`).join("|");
-
-    const url = new URL("https://api.geoapify.com/v1/routing");
-    url.searchParams.set("waypoints", formatted);
-    url.searchParams.set("mode", mode);
-    url.searchParams.set("details", "instruction_details,route_details");
-    url.searchParams.set("apiKey", GEOAPIFY_KEY);
-
-    const fetch = await (typeof fetch === "function"
-      ? fetch
-      : (
-          await import("node-fetch")
-        ).default);
-    const resp = await fetch(url.href);
-
-    if (!resp.ok) {
-      const text = await resp.text();
-      return res.status(resp.status).json({ error: "Geoapify routing error", details: text });
-    }
-
-    const data = await resp.json();
-
-    const route = data?.features?.[0];
-    if (!route || !route.geometry?.coordinates?.length) {
-      return res.status(404).json({ error: "No route geometry returned from Geoapify." });
-    }
-
-    const coords = route.geometry.coordinates.map(([lng, lat]) => [lat, lng]);
-    const summary = route.properties?.summary || {};
-
-    return res.json({
-      polylineCoordinates: coords,
-      distanceKm: (summary.distance || 0) / 1000,
-      durationMinutes: Math.round((summary.duration || 0) / 60),
-      raw: route,
-    });
-  } catch (error) {
-    console.error("Route calculation error:", error);
-    res.status(500).json({ error: "Failed to calculate route", details: error.message });
   }
 });
 
