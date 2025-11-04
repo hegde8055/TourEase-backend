@@ -1,29 +1,22 @@
 ﻿// /server/server.js
-import express from "express";
-import cors from "cors";
-import path from "path";
-import cookieParser from "cookie-parser";
-import mongoose from "mongoose";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import fs from "fs";
-import dotenv from "dotenv";
-import { fileURLToPath } from "url";
+const express = require("express");
+const cors = require("cors");
+const path = require("path");
+const cookieParser = require("cookie-parser");
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const fs = require("fs");
+require("dotenv").config();
 
 // --- Routers ---
-import destinationsRouter from "./routes/destinations.js";
-import trendingRouter from "./routes/trending.js";
-import itineraryRouter from "./routes/itinerary.js";
-import placesRouter from "./routes/places.js";
-import chatbotRouter from "./routes/chatbot.js";
-import imagesRouter from "./routes/images.js";
-import { User } from "./models/User.js";
-
-dotenv.config();
-
-// --- Directory setup ---
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const destinationsRouter = require("./routes/destinations");
+const trendingRouter = require("./routes/trending");
+const itineraryRouter = require("./routes/itinerary");
+const placesRouter = require("./routes/places");
+const chatbotRouter = require("./routes/chatbot");
+const imagesRouter = require("./routes/images");
+const { User } = require("./models/User");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
