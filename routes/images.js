@@ -1,8 +1,8 @@
 // /server/routes/images.js
-import express from "express";
-import jwt from "jsonwebtoken";
-import { createApi } from "unsplash-js";
-import sharp from "sharp";
+const express = require("express");
+const jwt = require("jsonwebtoken");
+const { createApi } = require("unsplash-js");
+const sharp = require("sharp");
 
 const router = express.Router();
 
@@ -71,4 +71,4 @@ router.get("/destination", authenticateToken, async (req, res) => {
   }
 });
 
-export default router;
+module.exports = router;
