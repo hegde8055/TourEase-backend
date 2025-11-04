@@ -102,8 +102,8 @@ const callGroqPlan = async ({ prompt }) => {
 };
 
 // ==========================================================
-// --- START OF NEW ROUTE (FIX) ---
-// This is the route your frontend (routingUtils.js) is trying to call.
+// --- THIS IS THE MISSING ROUTE THAT FIXES THE 405 ERROR ---
+// It matches the frontend call to: /api/itinerary/calculate-route
 // ==========================================================
 router.post("/calculate-route", authenticateToken, async (req, res) => {
   const { waypoints, mode = "drive" } = req.body;
@@ -127,8 +127,8 @@ router.post("/calculate-route", authenticateToken, async (req, res) => {
     url.searchParams.set("waypoints", waypointString);
     url.searchParams.set("mode", mode);
     url.searchParams.set("apiKey", GEOAPIFY_KEY);
-    // You can add more details if you want, e.g.:
-    // url.searchParams.set("details", "route_details");
+    // You MUST add details to get the geometry, which the frontend needs
+    url.searchParams.set("details", "route_details");
 
     const routeResponse = await fetch(url.href);
 
@@ -141,6 +141,7 @@ router.post("/calculate-route", authenticateToken, async (req, res) => {
     }
 
     // Pass the raw JSON data from Geoapify directly to the frontend
+    // This is what routingUtils.js is expecting
     const routeData = await routeResponse.json();
     res.json(routeData);
   } catch (error) {
@@ -149,7 +150,7 @@ router.post("/calculate-route", authenticateToken, async (req, res) => {
   }
 });
 // ==========================================================
-// --- END OF NEW ROUTE (FIX) ---
+// --- END OF NEW ROUTE ---
 // ==========================================================
 
 // POST /api/itinerary/ai/plan - Generate AI plan using Groq
