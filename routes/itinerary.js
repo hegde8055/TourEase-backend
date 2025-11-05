@@ -102,7 +102,7 @@ const callGroqPlan = async ({ prompt }) => {
 };
 
 // ==========================================================
-// --- THIS IS THE UPDATED /calculate-route HANDLER ---
+// --- THIS IS THE MISSING FUNCTION THAT FIXES THE 404 ERROR ---
 // ==========================================================
 router.post("/calculate-route", authenticateToken, async (req, res) => {
   const { waypoints, mode = "drive" } = req.body;
@@ -119,10 +119,7 @@ router.post("/calculate-route", authenticateToken, async (req, res) => {
   try {
     const fetch = await ensureFetch();
 
-    // ==========================================================
-    // --- THIS IS THE FIX ---
-    // The endpoint for POST requests is /v1/route, NOT /v1/routing
-    // ==========================================================
+    // THIS IS THE CORRECT GEOAPIFY ENDPOINT FOR POST REQUESTS
     const url = new URL("https://api.geoapify.com/v1/route");
     url.searchParams.set("apiKey", GEOAPIFY_KEY);
 
@@ -147,10 +144,8 @@ router.post("/calculate-route", authenticateToken, async (req, res) => {
         .json({ error: "Failed to fetch route from provider", details: errorText });
     }
 
-    // Pass the raw JSON data from Geoapify directly to the frontend
     const routeData = await routeResponse.json();
 
-    // Add a check in case Geoapify returns 200 OK but no route
     if (!routeData.features || routeData.features.length === 0) {
       console.warn("Geoapify returned 200 OK but no route features.");
       return res.status(404).json({ error: "No route features found for these waypoints." });
@@ -163,7 +158,7 @@ router.post("/calculate-route", authenticateToken, async (req, res) => {
   }
 });
 // ==========================================================
-// --- END OF UPDATED ROUTE ---
+// --- END OF NEW ROUTE ---
 // ==========================================================
 
 // POST /api/itinerary/ai/plan - Generate AI plan using Groq
@@ -240,10 +235,7 @@ router.post("/ai/plan", authenticateToken, async (req, res) => {
           if (to && typeof to.lat === "number" && typeof to.lng === "number") {
             const fetch = await ensureFetch();
 
-            // ==========================================================
-            // --- THIS IS THE 2ND FIX ---
-            // Using the correct /v1/route POST endpoint here as well
-            // ==========================================================
+            // --- ALSO FIXING THIS ENDPOINT ---
             const url = new URL("https://api.geoapify.com/v1/route");
             url.searchParams.set("apiKey", GEOAPIFY_KEY);
 
@@ -262,7 +254,7 @@ router.post("/ai/plan", authenticateToken, async (req, res) => {
 
             if (r.ok) {
               const data = await r.json();
-              const summary = data?.features?.[0]?.properties || {};
+              const summary = data?.features?.[0]?.properties?.summary || {};
               const distanceMeters = summary.distance || null;
               const durationSeconds = summary.duration || null;
               newItinerary.distanceHistory = newItinerary.distanceHistory || [];
