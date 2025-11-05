@@ -102,8 +102,8 @@ const callGroqPlan = async ({ prompt }) => {
 };
 
 // ==========================================================
-// --- THIS IS THE MISSING ROUTE THAT FIXES THE 405 ERROR ---
-// It matches the frontend call to: /api/itinerary/calculate-route
+// --- START OF NEW ROUTE (FIX) ---
+// This is the route your frontend (routingUtils.js) is trying to call.
 // ==========================================================
 router.post("/calculate-route", authenticateToken, async (req, res) => {
   const { waypoints, mode = "drive" } = req.body;
@@ -150,7 +150,7 @@ router.post("/calculate-route", authenticateToken, async (req, res) => {
   }
 });
 // ==========================================================
-// --- END OF NEW ROUTE ---
+// --- END OF NEW ROUTE (FIX) ---
 // ==========================================================
 
 // POST /api/itinerary/ai/plan - Generate AI plan using Groq
