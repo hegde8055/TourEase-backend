@@ -119,8 +119,11 @@ router.post("/calculate-route", authenticateToken, async (req, res) => {
   try {
     const fetch = await ensureFetch();
 
-    // THIS IS THE CORRECT GEOAPIFY ENDPOINT FOR POST REQUESTS
-    const url = new URL("https://api.geoapify.com/v1/route");
+    // ==========================================================
+    // --- THIS IS THE GEOAPIFY URL FIX ---
+    // The endpoint is /v1/routing and it DOES support POST
+    // ==========================================================
+    const url = new URL("https://api.geoapify.com/v1/routing");
     url.searchParams.set("apiKey", GEOAPIFY_KEY);
 
     // Convert waypoints from {lat, lng} to the [lng, lat] format Geoapify needs
@@ -236,11 +239,11 @@ router.post("/ai/plan", authenticateToken, async (req, res) => {
             const fetch = await ensureFetch();
 
             // --- ALSO FIXING THIS ENDPOINT ---
-            const url = new URL("https://api.geoapify.com/v1/route");
+            const url = new URL("https://api.geoapify.com/v1/routing"); // Use /v1/routing
             url.searchParams.set("apiKey", GEOAPIFY_KEY);
 
             const r = await fetch(url.href, {
-              method: "POST",
+              method: "POST", // Use POST
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 mode: "drive",
@@ -254,18 +257,27 @@ router.post("/ai/plan", authenticateToken, async (req, res) => {
 
             if (r.ok) {
               const data = await r.json();
-              const summary = data?.features?.[0]?.properties?.summary || {};
-              const distanceMeters = summary.distance || null;
-              const durationSeconds = summary.duration || null;
-              newItinerary.distanceHistory = newItinerary.distanceHistory || [];
-              newItinerary.distanceHistory.push({
-                from: fromLocation,
-                to: { lat: to.lat, lng: to.lng },
-                mode: "drive",
-                distanceMeters,
-                durationSeconds,
-                createdAt: new Date(),
-              });
+              // Check for features array and its length
+              if (data.features && data.features.length > 0) {
+                const summary = data.features[0].properties || {};
+                const distanceMeters = summary.distance || null;
+                const durationSeconds = summary.duration || null;
+
+                newItinerary.distanceHistory = newItinerary.distanceHistory || [];
+                newItinerary.distanceHistory.push({
+                  from: fromLocation,
+                  to: { lat: to.lat, lng: to.lng },
+                  mode: "drive",
+                  distanceMeters,
+                  durationSeconds,
+                  createdAt: new Date(),
+                });
+              } else {
+                console.warn("Distance precompute (ai/plan) returned no features.");
+              }
+            } else {
+              const errorText = await r.text();
+              console.warn("Distance precompute (ai/plan) failed:", errorText);
             }
           }
         }
@@ -511,9 +523,12 @@ router.post("/save", authenticateToken, async (req, res) => {
   } catch (error) {
     console.error("Save itinerary error:", error);
     console.error("Error stack:", error.stack);
-    // === FIX for 5im00 typo ===
+    // ==========================================================
+    // --- THIS IS THE SYNTAX ERROR FIX ---
+    // Changed 5im00 to 500
+    // ==========================================================
     res.status(500).json({
-      // === END OF FIX ===
+      // This was 5im00 in your file
       error: "Failed to save itinerary",
       details: error.message,
     });
@@ -529,13 +544,17 @@ router.put("/:id", authenticateToken, async (req, res) => {
     });
 
     if (!itinerary) {
-      // === FIX for 4404 typo ===
-      return res.status(404).json({ error: "Itinerary not found" });
-      // === END OF FIX ===
+      return res.status(404).json({ error: "Itinerary not found" }); // Was 4404 in your file
     }
 
     // Update fields (touristPlacesByDay replaces legacy flat arrays)
-    const allowedUpdates = ["destination", "touristPlacesByDay", "passengerInfo", "costEstimate"];
+    const allowedUpdates = [
+      "destination",
+      "touristPlacesByDay",
+      "passengerInfo",
+      "costEstimate",
+      "aiPlan",
+    ]; // Added aiPlan
 
     allowedUpdates.forEach((field) => {
       if (req.body[field] !== undefined) {
