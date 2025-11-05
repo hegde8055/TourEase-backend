@@ -28,6 +28,11 @@ const SERVER_URL = process.env.SERVER_URL || `http://localhost:${PORT}`;
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
 
 // --- MIDDLEWARE ---
+const additionalCorsOrigins = (process.env.ADDITIONAL_CORS_ORIGINS || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 const allowedOrigins = Array.from(
   new Set(
     [
@@ -37,21 +42,19 @@ const allowedOrigins = Array.from(
       "http://localhost:3000",
       "http://localhost:3001",
       `http://127.0.0.1:${PORT}`,
-      "https://tourease-theta.vercel.app", // Your main Vercel URL
-      // ==========================================================
-      // --- THIS IS THE FIX ---
-      // Add the new Vercel preview URL from the error log
-      // ==========================================================
-      "https://tourease-6r2imra84-hegde8055s-projects.vercel.app",
+      "https://tourease-theta.vercel.app",
+      ...additionalCorsOrigins,
     ].filter(Boolean)
   )
 );
+
+const vercelPreviewPattern = /^https:\/\/tourease-[a-z0-9-]+\.vercel\.app$/i;
 
 app.use(
   cors({
     origin: (origin, callback) => {
       // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || allowedOrigins.includes(origin) || vercelPreviewPattern.test(origin)) {
         callback(null, true);
       } else {
         console.error(`CORS error: Origin ${origin} not allowed`); // Log CORS errors
