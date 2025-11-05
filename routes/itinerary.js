@@ -107,8 +107,20 @@ const callGroqPlan = async ({ prompt }) => {
 router.post("/calculate-route", authenticateToken, async (req, res) => {
   const { waypoints, mode = "drive" } = req.body;
 
-  if (!waypoints || !Array.isArray(waypoints) || waypoints.length < 2) {
-    return res.status(400).json({ error: "Invalid waypoints array" });
+  const normalizedWaypoints = Array.isArray(waypoints)
+    ? waypoints
+        .map((wp) => {
+          if (!wp || typeof wp !== "object") return null;
+          const lat = Number(wp.lat ?? wp.latitude);
+          const lng = Number(wp.lng ?? wp.lon ?? wp.longitude ?? wp.long);
+          if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+          return { lat, lng };
+        })
+        .filter(Boolean)
+    : [];
+
+  if (normalizedWaypoints.length < 2) {
+    return res.status(400).json({ error: "Invalid waypoint coordinates" });
   }
 
   if (!GEOAPIFY_KEY) {
@@ -123,7 +135,8 @@ router.post("/calculate-route", authenticateToken, async (req, res) => {
     url.searchParams.set("apiKey", GEOAPIFY_KEY);
     url.searchParams.set("mode", mode);
 
-    const geoapifyWaypoints = waypoints.map((wp) => `${wp.lng},${wp.lat}`).join("|");
+    const geoapifyWaypoints = normalizedWaypoints.map((wp) => `${wp.lat},${wp.lng}`).join("|");
+
     url.searchParams.set("waypoints", geoapifyWaypoints);
     url.searchParams.append("details", "route_details");
 
@@ -140,8 +153,12 @@ router.post("/calculate-route", authenticateToken, async (req, res) => {
     const routeData = await routeResponse.json();
 
     if (!routeData.features || routeData.features.length === 0) {
-      console.warn("Geoapify returned 200 OK but no route features.");
-      return res.status(404).json({ error: "No route features found for these waypoints." });
+      const providerError = routeData.error || routeData.message;
+      console.warn("Geoapify returned 200 OK but no route features.", providerError || "");
+      return res.status(502).json({
+        error: "No route features found for these waypoints.",
+        providerError,
+      });
     }
 
     res.json(routeData);
@@ -225,16 +242,24 @@ router.post("/ai/plan", authenticateToken, async (req, res) => {
       try {
         if (fromLocation && GEOAPIFY_KEY) {
           const to = destination?.location?.coordinates;
-          if (to && typeof to.lat === "number" && typeof to.lng === "number") {
+          const fromLat = Number(fromLocation.lat ?? fromLocation.latitude);
+          const fromLng = Number(
+            fromLocation.lng ?? fromLocation.longitude ?? fromLocation.lon ?? fromLocation.long
+          );
+
+          if (
+            to &&
+            typeof to.lat === "number" &&
+            typeof to.lng === "number" &&
+            Number.isFinite(fromLat) &&
+            Number.isFinite(fromLng)
+          ) {
             const fetch = await ensureFetch();
 
             const url = new URL("https://api.geoapify.com/v1/routing");
             url.searchParams.set("apiKey", GEOAPIFY_KEY);
             url.searchParams.set("mode", "drive");
-            url.searchParams.set(
-              "waypoints",
-              `${fromLocation.lng},${fromLocation.lat}|${to.lng},${to.lat}`
-            );
+            url.searchParams.set("waypoints", `${fromLat},${fromLng}|${to.lat},${to.lng}`);
             url.searchParams.append("details", "instruction_details");
             url.searchParams.append("details", "route_details");
 
