@@ -32,7 +32,12 @@ const allowedOrigins = Array.from(
       "http://localhost:3000",
       "http://localhost:3001",
       `http://127.0.0.1:${PORT}`,
-      "https://tourease-theta.vercel.app", // <-- IMPORTANT: Make sure your Vercel URL is allowed
+      "https://tourease-theta.vercel.app", // Your main Vercel URL
+      // ==========================================================
+      // --- THIS IS THE FIX ---
+      // Add the new Vercel preview URL from the error log
+      // ==========================================================
+      "https://tourease-6r2imra84-hegde8055s-projects.vercel.app",
     ].filter(Boolean)
   )
 );
@@ -271,7 +276,7 @@ app.put("/api/profile/update", authenticateToken, async (req, res) => {
       new: true,
       runValidators: true,
     }).select("-password");
-    if (!user) return res.status(4404).json({ error: "User not found" });
+    if (!user) return res.status(404).json({ error: "User not found" });
     res.json({ message: "Profile updated successfully", user });
   } catch (error) {
     if (error.name === "ValidationError") return res.status(400).json({ error: error.message });
