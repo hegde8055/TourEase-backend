@@ -59,7 +59,7 @@ const sanitizeJsonText = (text) => {
 };
 
 const removeTrailingCommas = (jsonText) => {
-  if (!jsonText || typeof text !== "string") return jsonText;
+  if (!jsonText || typeof jsonText !== "string") return jsonText;
   return jsonText.replace(/,\s*}/g, "}").replace(/,\s*\]/g, "]");
 };
 
@@ -119,25 +119,15 @@ router.post("/calculate-route", authenticateToken, async (req, res) => {
   try {
     const fetch = await ensureFetch();
 
-    // ==========================================================
-    // --- THIS IS THE GEOAPIFY URL FIX ---
-    // The endpoint is /v1/routing and it DOES support POST
-    // ==========================================================
     const url = new URL("https://api.geoapify.com/v1/routing");
     url.searchParams.set("apiKey", GEOAPIFY_KEY);
+    url.searchParams.set("mode", mode);
 
-    // Convert waypoints from {lat, lng} to the [lng, lat] format Geoapify needs
-    const geoapifyWaypoints = waypoints.map((wp) => [wp.lng, wp.lat]);
+    const geoapifyWaypoints = waypoints.map((wp) => `${wp.lng},${wp.lat}`).join("|");
+    url.searchParams.set("waypoints", geoapifyWaypoints);
+    url.searchParams.append("details", "route_details");
 
-    const routeResponse = await fetch(url.href, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        mode: mode,
-        waypoints: geoapifyWaypoints,
-        details: ["route_details"],
-      }),
-    });
+    const routeResponse = await fetch(url.href, { method: "GET" });
 
     if (!routeResponse.ok) {
       const errorText = await routeResponse.text();
@@ -238,22 +228,17 @@ router.post("/ai/plan", authenticateToken, async (req, res) => {
           if (to && typeof to.lat === "number" && typeof to.lng === "number") {
             const fetch = await ensureFetch();
 
-            // --- ALSO FIXING THIS ENDPOINT ---
-            const url = new URL("https://api.geoapify.com/v1/routing"); // Use /v1/routing
+            const url = new URL("https://api.geoapify.com/v1/routing");
             url.searchParams.set("apiKey", GEOAPIFY_KEY);
+            url.searchParams.set("mode", "drive");
+            url.searchParams.set(
+              "waypoints",
+              `${fromLocation.lng},${fromLocation.lat}|${to.lng},${to.lat}`
+            );
+            url.searchParams.append("details", "instruction_details");
+            url.searchParams.append("details", "route_details");
 
-            const r = await fetch(url.href, {
-              method: "POST", // Use POST
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                mode: "drive",
-                waypoints: [
-                  [fromLocation.lng, fromLocation.lat],
-                  [to.lng, to.lat],
-                ],
-                details: ["instruction_details", "route_details"],
-              }),
-            });
+            const r = await fetch(url.href, { method: "GET" });
 
             if (r.ok) {
               const data = await r.json();

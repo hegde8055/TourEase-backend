@@ -17,7 +17,12 @@ require("dotenv").config();
 
 // --- INITIAL SETUP ---
 const app = express();
-const PORT = process.env.PORT || 5000;
+const parsePort = (value, fallback) => {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
+};
+
+const PORT = parsePort(process.env.PORT, 5000);
 const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000"; // Needed for reset link
 const SERVER_URL = process.env.SERVER_URL || `http://localhost:${PORT}`;
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
@@ -346,4 +351,35 @@ app.use("/api/images", imagesRouter);
 // app.use(express.static(path.join(__dirname, "..", "client", "build")));
 
 // --- SERVER LISTENER ---
-app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+const candidatePorts = Array.from(
+  new Set([
+    PORT,
+    5000,
+    8080,
+    0, // lets Node pick a random free port as a last resort
+  ])
+);
+
+const startServer = (index = 0) => {
+  const targetPort = candidatePorts[index];
+  const server = app
+    .listen(targetPort, () => {
+      const address = server.address();
+      const assignedPort = typeof address === "object" && address ? address.port : targetPort;
+      console.log(`🚀 Server running on http://localhost:${assignedPort}`);
+    })
+    .on("error", (error) => {
+      if (error.code === "EADDRINUSE" && index < candidatePorts.length - 1) {
+        const nextPort = candidatePorts[index + 1];
+        console.warn(
+          `⚠️ Port ${targetPort} is busy. Retrying with ${nextPort || "an open port"}...`
+        );
+        startServer(index + 1);
+      } else {
+        console.error(`❌ Unable to start server on port ${targetPort}:`, error.message);
+        process.exit(1);
+      }
+    });
+};
+
+startServer();
