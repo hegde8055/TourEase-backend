@@ -102,8 +102,7 @@ const callGroqPlan = async ({ prompt }) => {
 };
 
 // ==========================================================
-// --- START OF NEW ROUTE (FIX) ---
-// This is the route your frontend (routingUtils.js) is trying to call.
+// --- THIS IS THE UPDATED /calculate-route HANDLER ---
 // ==========================================================
 router.post("/calculate-route", authenticateToken, async (req, res) => {
   const { waypoints, mode = "drive" } = req.body;
@@ -119,30 +118,45 @@ router.post("/calculate-route", authenticateToken, async (req, res) => {
 
   try {
     const fetch = await ensureFetch();
+
+    // The API key is sent as a query parameter
     const url = new URL("https://api.geoapify.com/v1/routing");
-
-    // Format waypoints for Geoapify: lat,lng|lat,lng
-    const waypointString = waypoints.map((wp) => `${wp.lat},${wp.lng}`).join("|");
-
-    url.searchParams.set("waypoints", waypointString);
-    url.searchParams.set("mode", mode);
     url.searchParams.set("apiKey", GEOAPIFY_KEY);
-    // You MUST add details to get the geometry, which the frontend needs
-    url.searchParams.set("details", "route_details");
 
-    const routeResponse = await fetch(url.href);
+    // --- THIS IS THE FIX ---
+    // We now send the data using a POST request, which supports many waypoints.
+    // We also convert the waypoints from {lat, lng} to the [lng, lat] format Geoapify needs.
+    // ---
+
+    const geoapifyWaypoints = waypoints.map((wp) => [wp.lng, wp.lat]);
+
+    const routeResponse = await fetch(url.href, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        mode: mode,
+        waypoints: geoapifyWaypoints,
+        details: ["route_details"],
+      }),
+    });
 
     if (!routeResponse.ok) {
       const errorText = await routeResponse.text();
       console.error("Geoapify API Error:", errorText);
       return res
         .status(routeResponse.status)
-        .json({ error: "Failed to fetch route from provider" });
+        .json({ error: "Failed to fetch route from provider", details: errorText });
     }
 
     // Pass the raw JSON data from Geoapify directly to the frontend
-    // This is what routingUtils.js is expecting
     const routeData = await routeResponse.json();
+
+    // Add a check in case Geoapify returns 200 OK but no route
+    if (!routeData.features || routeData.features.length === 0) {
+      console.warn("Geoapify returned 200 OK but no route features.");
+      return res.status(404).json({ error: "No route features found for these waypoints." });
+    }
+
     res.json(routeData);
   } catch (error) {
     console.error("Route calculation error:", error);
@@ -150,7 +164,7 @@ router.post("/calculate-route", authenticateToken, async (req, res) => {
   }
 });
 // ==========================================================
-// --- END OF NEW ROUTE (FIX) ---
+// --- END OF UPDATED ROUTE ---
 // ==========================================================
 
 // POST /api/itinerary/ai/plan - Generate AI plan using Groq
@@ -225,16 +239,23 @@ router.post("/ai/plan", authenticateToken, async (req, res) => {
         if (fromLocation && GEOAPIFY_KEY) {
           const to = destination?.location?.coordinates;
           if (to && typeof to.lat === "number" && typeof to.lng === "number") {
-            const url = new URL("https://api.geoapify.com/v1/routing");
-            url.searchParams.set(
-              "waypoints",
-              `${fromLocation.lat},${fromLocation.lng}|${to.lat},${to.lng}`
-            );
-            url.searchParams.set("mode", "drive");
-            url.searchParams.set("details", "instruction_details,route_details");
-            url.searchParams.set("apiKey", GEOAPIFY_KEY);
             const fetch = await ensureFetch();
-            const r = await fetch(url.href);
+            const url = new URL("https://api.geoapify.com/v1/routing");
+            url.searchParams.set("apiKey", GEOAPIFY_KEY);
+
+            const r = await fetch(url.href, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                mode: "drive",
+                waypoints: [
+                  [fromLocation.lng, fromLocation.lat],
+                  [to.lng, to.lat],
+                ],
+                details: ["instruction_details", "route_details"],
+              }),
+            });
+
             if (r.ok) {
               const data = await r.json();
               const summary = data?.features?.[0]?.properties?.summary || {};
