@@ -119,15 +119,14 @@ router.post("/calculate-route", authenticateToken, async (req, res) => {
   try {
     const fetch = await ensureFetch();
 
-    // The API key is sent as a query parameter
-    const url = new URL("https://api.geoapify.com/v1/routing");
+    // ==========================================================
+    // --- THIS IS THE FIX ---
+    // The endpoint for POST requests is /v1/route, NOT /v1/routing
+    // ==========================================================
+    const url = new URL("https://api.geoapify.com/v1/route");
     url.searchParams.set("apiKey", GEOAPIFY_KEY);
 
-    // --- THIS IS THE FIX ---
-    // We now send the data using a POST request, which supports many waypoints.
-    // We also convert the waypoints from {lat, lng} to the [lng, lat] format Geoapify needs.
-    // ---
-
+    // Convert waypoints from {lat, lng} to the [lng, lat] format Geoapify needs
     const geoapifyWaypoints = waypoints.map((wp) => [wp.lng, wp.lat]);
 
     const routeResponse = await fetch(url.href, {
@@ -240,7 +239,12 @@ router.post("/ai/plan", authenticateToken, async (req, res) => {
           const to = destination?.location?.coordinates;
           if (to && typeof to.lat === "number" && typeof to.lng === "number") {
             const fetch = await ensureFetch();
-            const url = new URL("https://api.geoapify.com/v1/routing");
+
+            // ==========================================================
+            // --- THIS IS THE 2ND FIX ---
+            // Using the correct /v1/route POST endpoint here as well
+            // ==========================================================
+            const url = new URL("https://api.geoapify.com/v1/route");
             url.searchParams.set("apiKey", GEOAPIFY_KEY);
 
             const r = await fetch(url.href, {
@@ -258,7 +262,7 @@ router.post("/ai/plan", authenticateToken, async (req, res) => {
 
             if (r.ok) {
               const data = await r.json();
-              const summary = data?.features?.[0]?.properties?.summary || {};
+              const summary = data?.features?.[0]?.properties || {};
               const distanceMeters = summary.distance || null;
               const durationSeconds = summary.duration || null;
               newItinerary.distanceHistory = newItinerary.distanceHistory || [];
