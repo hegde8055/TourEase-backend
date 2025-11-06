@@ -141,7 +141,10 @@ router.post("/geocode", async (req, res) => {
 
   try {
     if (normalizedQuery) {
-      const cached = await DestinationCache.findOne(cacheFilter).lean();
+      let cached = await DestinationCache.findOne(cacheFilter).lean();
+      if (!cached) {
+        cached = await DestinationCache.findOne({ normalizedQuery }).lean();
+      }
       if (cached) {
         await touchDestinationCache(cached._id, trimmedQuery);
         return res.json({
@@ -185,41 +188,49 @@ router.post("/geocode", async (req, res) => {
     };
 
     if (normalizedQuery) {
-      const cacheUpdate = {
-        $set: {
-          originalQuery: trimmedQuery,
-          formattedAddress: responsePayload.formattedAddress,
-          city: responsePayload.city,
-          state: responsePayload.state,
-          country: responsePayload.country,
-          coordinates: responsePayload.coordinates,
-          raw: match,
-          lastAccessedAt: new Date(),
-        },
-        $setOnInsert: {
-          normalizedQuery,
-        },
-        $inc: { searchCount: 1 },
+      const setFields = {
+        originalQuery: trimmedQuery,
+        formattedAddress: responsePayload.formattedAddress,
+        city: responsePayload.city,
+        state: responsePayload.state,
+        country: responsePayload.country,
+        coordinates: responsePayload.coordinates,
+        raw: match,
+        lastAccessedAt: new Date(),
       };
 
       if (scope?.ownerUserId) {
-        cacheUpdate.$setOnInsert.ownerUserId = scope.ownerUserId;
+        setFields.ownerUserId = scope.ownerUserId;
       }
       if (scope?.sessionKey) {
-        cacheUpdate.$setOnInsert.sessionKey = scope.sessionKey;
+        setFields.sessionKey = scope.sessionKey;
       }
 
+      const updateOps = {
+        $set: setFields,
+        $inc: { searchCount: 1 },
+      };
+
+      const upsertOps = {
+        ...updateOps,
+        $setOnInsert: { normalizedQuery },
+      };
+
       try {
-        await DestinationCache.findOneAndUpdate(cacheFilter, cacheUpdate, {
-          upsert: true,
-          setDefaultsOnInsert: true,
-        });
+        const scopedDoc = await DestinationCache.findOne(cacheFilter).select("_id");
+        if (scopedDoc) {
+          await DestinationCache.updateOne({ _id: scopedDoc._id }, updateOps);
+        } else {
+          await DestinationCache.updateOne(cacheFilter, upsertOps, {
+            upsert: true,
+            setDefaultsOnInsert: true,
+          });
+        }
       } catch (cacheError) {
         if (cacheError?.code === 11000) {
           try {
-            await DestinationCache.findOneAndUpdate({ normalizedQuery }, cacheUpdate, {
-              upsert: true,
-              setDefaultsOnInsert: true,
+            await DestinationCache.updateOne({ normalizedQuery }, updateOps, {
+              upsert: false,
             });
           } catch (secondaryError) {
             console.warn(
