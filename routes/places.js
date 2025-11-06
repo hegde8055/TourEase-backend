@@ -14,6 +14,14 @@ const fetchApi = async (...args) => {
   return fetchFn(...args);
 };
 
+const ensureFetch = async () => {
+  if (!fetchFn) {
+    const { default: nodeFetch } = await import("node-fetch");
+    fetchFn = nodeFetch;
+  }
+  return fetchFn;
+};
+
 const GEOAPIFY_PLACES_API_KEY = process.env.GEOAPIFY_PLACES_API_KEY || process.env.GEOAPIFY_API_KEY;
 const GEOAPIFY_STATIC_MAP_API_KEY =
   process.env.GEOAPIFY_STATIC_MAP_API_KEY ||
