@@ -1,6 +1,7 @@
 ﻿// /server/server.js
 const express = require("express");
 const cors = require("cors");
+const compression = require("compression");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
@@ -17,6 +18,7 @@ require("dotenv").config();
 
 // --- INITIAL SETUP ---
 const app = express();
+app.set("trust proxy", 1);
 const parsePort = (value, fallback) => {
   const parsed = Number(value);
   return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
@@ -64,16 +66,30 @@ app.use(
     credentials: true,
   })
 );
+app.use(compression());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser());
 
 // --- STATIC FILE SERVING (FOR UPLOADS) ---
 // We keep this, so you can serve user-uploaded images if needed
-app.use("/public", express.static(path.join(__dirname, "public")));
+app.use(
+  "/public",
+  express.static(path.join(__dirname, "public"), {
+    maxAge: "2h",
+    etag: true,
+    immutable: false,
+  })
+);
 const uploadsDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
-app.use("/uploads", express.static(uploadsDir));
+app.use(
+  "/uploads",
+  express.static(uploadsDir, {
+    maxAge: "15m",
+    etag: true,
+  })
+);
 
 // --- DATABASE CONNECTION ---
 const MONGO_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/tourease";
