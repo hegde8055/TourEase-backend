@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
 
+const DestinationCache = require("../models/DestinationCache");
+const { authenticateToken } = require("../middleware/auth");
+
 let fetchFn = typeof fetch === "function" ? fetch : null;
 
 const fetchApi = async (...args) => {
@@ -66,6 +69,87 @@ const ensureFetch = async () => {
   return fetchFn;
 };
 
+const normalizeQuery = (value = "") => value.trim().toLowerCase();
+
+const sessionHeaderNames = ["x-session-key", "x-session-id"];
+
+const getSessionKeyFromRequest = (req) => {
+  for (const headerName of sessionHeaderNames) {
+    const candidate = req.headers?.[headerName];
+    if (typeof candidate === "string" && candidate.trim()) {
+      return candidate.trim();
+    }
+  }
+  return null;
+};
+
+const getCacheScope = (req) => ({
+  ownerUserId: req.user?.userId || null,
+  sessionKey: req.sessionKey || getSessionKeyFromRequest(req),
+});
+
+const buildCacheFilter = (normalizedQuery, scope) => {
+  const filter = {};
+  if (normalizedQuery) {
+    filter.normalizedQuery = normalizedQuery;
+  }
+  if (scope?.ownerUserId) {
+    filter.ownerUserId = scope.ownerUserId;
+  }
+  if (scope?.sessionKey) {
+    filter.sessionKey = scope.sessionKey;
+  }
+  return filter;
+};
+
+const ensureSessionKey = (req, res, next) => {
+  const sessionKey = getSessionKeyFromRequest(req);
+  if (!sessionKey) {
+    return res.status(400).json({ error: "Session key header X-Session-Key is required" });
+  }
+  req.sessionKey = sessionKey;
+  next();
+};
+
+router.use(authenticateToken);
+router.use(ensureSessionKey);
+
+const touchDestinationCache = async (docId, originalQuery) => {
+  if (!docId) return;
+  try {
+    await DestinationCache.updateOne(
+      { _id: docId },
+      {
+        $inc: { searchCount: 1 },
+        $set: { lastAccessedAt: new Date(), originalQuery },
+      }
+    ).catch(() => {});
+  } catch (error) {
+    console.warn("Destination cache touch failed", error.message || error);
+  }
+};
+
+router.delete("/cache", async (req, res) => {
+  const scope = getCacheScope(req);
+  if (!scope.ownerUserId) {
+    return res.status(400).json({ error: "Unable to resolve user for cache scope" });
+  }
+  if (!scope.sessionKey) {
+    return res.status(400).json({ error: "Session key header X-Session-Key is required" });
+  }
+
+  try {
+    const filter = buildCacheFilter(null, scope);
+    const result = await DestinationCache.deleteMany(filter);
+    return res.json({ cleared: result?.deletedCount || 0 });
+  } catch (error) {
+    console.error("Destination cache clear error:", error);
+    return res
+      .status(500)
+      .json({ error: "Failed to clear destination cache", details: error.message });
+  }
+});
+
 // Geocode endpoint - convert address/place name to coordinates
 router.post("/geocode", async (req, res) => {
   if (!ensureGeoapifyConfigured(res)) return;
@@ -73,10 +157,36 @@ router.post("/geocode", async (req, res) => {
   if (!query || typeof query !== "string") {
     return res.status(400).json({ error: "A query string is required" });
   }
-  const key = getGeoapifyKey("places");
+
+  const trimmedQuery = query.trim();
+  if (!trimmedQuery) {
+    return res.status(400).json({ error: "A query string is required" });
+  }
+
+  const normalizedQuery = normalizeQuery(trimmedQuery);
+  const scope = getCacheScope(req);
+  const cacheFilter = buildCacheFilter(normalizedQuery, scope);
+
   try {
+    if (normalizedQuery) {
+      const cached = await DestinationCache.findOne(cacheFilter).lean();
+      if (cached) {
+        await touchDestinationCache(cached._id, trimmedQuery);
+        return res.json({
+          coordinates: cached.coordinates,
+          formattedAddress: cached.formattedAddress,
+          city: cached.city,
+          state: cached.state,
+          country: cached.country,
+          raw: cached.raw,
+          cached: true,
+        });
+      }
+    }
+
+    const key = getGeoapifyKey("places");
     const url = new URL("https://api.geoapify.com/v1/geocode/search");
-    url.searchParams.set("text", query);
+    url.searchParams.set("text", trimmedQuery);
     url.searchParams.set("limit", "1");
     url.searchParams.set("format", "json");
     url.searchParams.set("apiKey", key);
@@ -91,14 +201,49 @@ router.post("/geocode", async (req, res) => {
     if (!match) {
       return res.status(404).json({ error: "No results found for the query" });
     }
-    return res.json({
-      coordinates: { lat: match.lat, lng: match.lon },
+
+    const responsePayload = {
+      coordinates: { lat: Number(match.lat), lng: Number(match.lon) },
       formattedAddress: match.formatted,
       city: match.city || match.county,
       state: match.state,
       country: match.country,
       raw: match,
-    });
+      cached: false,
+    };
+
+    if (normalizedQuery) {
+      try {
+        await DestinationCache.findOneAndUpdate(
+          cacheFilter,
+          {
+            $set: {
+              originalQuery: trimmedQuery,
+              formattedAddress: responsePayload.formattedAddress,
+              city: responsePayload.city,
+              state: responsePayload.state,
+              country: responsePayload.country,
+              coordinates: responsePayload.coordinates,
+              raw: match,
+              lastAccessedAt: new Date(),
+              ownerUserId: scope.ownerUserId,
+              sessionKey: scope.sessionKey,
+            },
+            $setOnInsert: {
+              normalizedQuery,
+              ownerUserId: scope.ownerUserId,
+              sessionKey: scope.sessionKey,
+            },
+            $inc: { searchCount: 1 },
+          },
+          { upsert: true }
+        );
+      } catch (cacheError) {
+        console.warn("Failed to cache destination geocode", cacheError.message || cacheError);
+      }
+    }
+
+    return res.json(responsePayload);
   } catch (error) {
     console.error("Geoapify geocode error:", error);
     return res.status(500).json({ error: "Failed to geocode", details: error.message });
@@ -114,7 +259,7 @@ router.post("/distance", async (req, res) => {
   const key = getGeoapifyKey("places");
   try {
     const url = new URL("https://api.geoapify.com/v1/routing");
-    url.searchParams.set("waypoints", `${from.lat},${from.lng}|${to.lat},${to.lng}`);
+    url.searchParams.set("waypoints", `${from.lng},${from.lat}|${to.lng},${to.lat}`);
     url.searchParams.set("mode", `${mode}`);
     url.searchParams.set("details", "instruction_details,route_details");
     url.searchParams.set("apiKey", key);
@@ -249,9 +394,40 @@ router.post("/validate", async (req, res) => {
     return res.status(400).json({ error: "A destination query is required." });
   }
 
+  const trimmedQuery = query.trim();
+  if (!trimmedQuery) {
+    return res.status(400).json({ error: "A destination query is required." });
+  }
+
   try {
+    const normalizedQuery = normalizeQuery(trimmedQuery);
+    const scope = getCacheScope(req);
+    const cacheFilter = buildCacheFilter(normalizedQuery, scope);
+    if (normalizedQuery) {
+      const cached = await DestinationCache.findOne(cacheFilter).lean();
+      if (cached) {
+        await touchDestinationCache(cached._id, trimmedQuery);
+
+        const responsePayload = {
+          exists: true,
+          name: cached.raw?.result?.name || cached.raw?.name || trimmedQuery,
+          formattedAddress: cached.formattedAddress,
+          location: cached.coordinates,
+          timezone: cached.raw?.timezone?.name || null,
+          country: cached.country,
+          state: cached.state,
+          city: cached.city,
+          type: type || cached.raw?.result?.kind,
+          raw: cached.raw,
+          cached: true,
+        };
+
+        return res.json(responsePayload);
+      }
+    }
+
     const url = new URL("https://api.geoapify.com/v1/geocode/search");
-    url.searchParams.set("text", query);
+    url.searchParams.set("text", trimmedQuery);
     url.searchParams.set("limit", "1");
     url.searchParams.set("format", "json");
     url.searchParams.set("filter", "countrycode:in");
@@ -268,7 +444,7 @@ router.post("/validate", async (req, res) => {
       exists: true,
       name: match?.result?.name || match?.name || query,
       formattedAddress: match?.formatted,
-      location: { lat: match.lat, lng: match.lon },
+      location: { lat: Number(match.lat), lng: Number(match.lon) },
       timezone: match?.timezone?.name || null,
       country: match?.country,
       state: match?.state,
@@ -276,6 +452,37 @@ router.post("/validate", async (req, res) => {
       type: type || match?.result?.kind,
       raw: match,
     };
+
+    if (normalizedQuery) {
+      try {
+        await DestinationCache.findOneAndUpdate(
+          cacheFilter,
+          {
+            $set: {
+              originalQuery: trimmedQuery,
+              formattedAddress: responsePayload.formattedAddress,
+              city: responsePayload.city,
+              state: responsePayload.state,
+              country: responsePayload.country,
+              coordinates: responsePayload.location,
+              raw: match,
+              lastAccessedAt: new Date(),
+              ownerUserId: scope.ownerUserId,
+              sessionKey: scope.sessionKey,
+            },
+            $setOnInsert: {
+              normalizedQuery,
+              ownerUserId: scope.ownerUserId,
+              sessionKey: scope.sessionKey,
+            },
+            $inc: { searchCount: 1 },
+          },
+          { upsert: true }
+        );
+      } catch (cacheError) {
+        console.warn("Failed to cache destination validation", cacheError.message || cacheError);
+      }
+    }
 
     return res.json(responsePayload);
   } catch (error) {

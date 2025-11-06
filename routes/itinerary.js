@@ -15,6 +15,9 @@ const GEOAPIFY_KEY =
   process.env.GEOAPIFY_API_KEY ||
   process.env.GEOAPIFY_MAPS_API_KEY;
 
+const ROUTE_CACHE_TTL_MS = 15 * 60 * 1000;
+const routeCache = new Map();
+
 // Authentication middleware
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
@@ -131,11 +134,25 @@ router.post("/calculate-route", authenticateToken, async (req, res) => {
   try {
     const fetch = await ensureFetch();
 
+    const cacheKey = JSON.stringify({
+      mode,
+      waypoints: normalizedWaypoints.map((wp) => ({
+        lat: Number(wp.lat.toFixed(6)),
+        lng: Number(wp.lng.toFixed(6)),
+      })),
+    });
+
+    const now = Date.now();
+    const cached = routeCache.get(cacheKey);
+    if (cached && cached.expiresAt > now) {
+      return res.json(cached.data);
+    }
+
     const url = new URL("https://api.geoapify.com/v1/routing");
     url.searchParams.set("apiKey", GEOAPIFY_KEY);
     url.searchParams.set("mode", mode);
 
-    const geoapifyWaypoints = normalizedWaypoints.map((wp) => `${wp.lat},${wp.lng}`).join("|");
+    const geoapifyWaypoints = normalizedWaypoints.map((wp) => `${wp.lng},${wp.lat}`).join("|");
 
     url.searchParams.set("waypoints", geoapifyWaypoints);
     url.searchParams.append("details", "route_details");
@@ -159,6 +176,15 @@ router.post("/calculate-route", authenticateToken, async (req, res) => {
         error: "No route features found for these waypoints.",
         providerError,
       });
+    }
+
+    routeCache.set(cacheKey, {
+      data: routeData,
+      expiresAt: now + ROUTE_CACHE_TTL_MS,
+    });
+    if (routeCache.size > 200) {
+      const [firstKey] = routeCache.keys();
+      routeCache.delete(firstKey);
     }
 
     res.json(routeData);
