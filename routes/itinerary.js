@@ -148,55 +148,83 @@ router.post("/calculate-route", authenticateToken, async (req, res) => {
       return res.json(cached.data);
     }
 
-    const url = new URL("https://api.geoapify.com/v1/routing");
-    url.searchParams.set("apiKey", GEOAPIFY_KEY);
-    url.searchParams.set("mode", mode);
-    url.searchParams.set("format", "geojson");
-
     const geoapifyWaypoints = normalizedWaypoints.map((wp) => `${wp.lng},${wp.lat}`).join("|");
 
-    url.searchParams.set("waypoints", geoapifyWaypoints);
-    url.searchParams.set("details", "instruction_details,route_details");
+    const normalizeRoutePayload = (payload) => {
+      if (!payload || typeof payload !== "object") return payload;
+      if ((!payload.features || payload.features.length === 0) && Array.isArray(payload.results)) {
+        const fallbackFeatures = payload.results
+          .map((result) => {
+            const { geometry, ...properties } = result || {};
+            if (!geometry || !geometry.type || !geometry.coordinates) return null;
+            return {
+              type: "Feature",
+              geometry,
+              properties,
+            };
+          })
+          .filter(Boolean);
 
-    const routeResponse = await fetch(url.href, { method: "GET" });
-
-    if (!routeResponse.ok) {
-      const errorText = await routeResponse.text();
-      console.error("Geoapify API Error:", errorText);
-      return res
-        .status(routeResponse.status)
-        .json({ error: "Failed to fetch route from provider", details: errorText });
-    }
-
-    const routeData = await routeResponse.json();
-
-    if (
-      (!routeData.features || routeData.features.length === 0) &&
-      Array.isArray(routeData.results)
-    ) {
-      const fallbackFeatures = routeData.results
-        .map((result) => {
-          const { geometry, ...properties } = result || {};
-          if (!geometry || !geometry.type || !geometry.coordinates) return null;
-          return {
-            type: "Feature",
-            geometry,
-            properties,
-          };
-        })
-        .filter(Boolean);
-
-      if (fallbackFeatures.length) {
-        routeData.features = fallbackFeatures;
+        if (fallbackFeatures.length) {
+          payload.features = fallbackFeatures;
+        }
       }
+      return payload;
+    };
+
+    const queryVariants = [
+      { format: "geojson", details: "instruction_details,route_details" },
+      { format: "geojson", details: "route_details" },
+      { format: "json", details: "route_details" },
+    ];
+
+    let routeData = null;
+    let providerError = null;
+    let providerPayload = null;
+
+    for (const variant of queryVariants) {
+      const variantUrl = new URL("https://api.geoapify.com/v1/routing");
+      variantUrl.searchParams.set("apiKey", GEOAPIFY_KEY);
+      variantUrl.searchParams.set("mode", mode);
+      variantUrl.searchParams.set("waypoints", geoapifyWaypoints);
+      if (variant.format) {
+        variantUrl.searchParams.set("format", variant.format);
+      }
+      if (variant.details) {
+        variantUrl.searchParams.set("details", variant.details);
+      }
+
+      const variantResponse = await fetch(variantUrl.href, { method: "GET" });
+
+      if (!variantResponse.ok) {
+        const variantErrorText = await variantResponse.text();
+        providerError = `HTTP ${variantResponse.status}: ${variantErrorText}`;
+        providerPayload = null;
+        console.warn("Geoapify route variant failed", providerError, { variant });
+        continue;
+      }
+
+  const variantJson = await variantResponse.json();
+  providerPayload = variantJson;
+  const normalized = normalizeRoutePayload(JSON.parse(JSON.stringify(variantJson)));
+
+      if (normalized?.features && normalized.features.length > 0) {
+        routeData = normalized;
+        break;
+      }
+
+      providerError = normalized?.error || normalized?.message || "No route features";
+      console.warn("Geoapify route variant missing features", providerError, {
+        variant,
+        providerPayload: normalized,
+      });
     }
 
-    if (!routeData.features || routeData.features.length === 0) {
-      const providerError = routeData.error || routeData.message;
-      console.warn("Geoapify returned 200 OK but no route features.", providerError || "");
+    if (!routeData) {
       return res.status(502).json({
         error: "No route features found for these waypoints.",
         providerError,
+        providerPayload,
       });
     }
 

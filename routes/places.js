@@ -226,8 +226,6 @@ router.post("/geocode", async (req, res) => {
               coordinates: responsePayload.coordinates,
               raw: match,
               lastAccessedAt: new Date(),
-              ownerUserId: scope.ownerUserId,
-              sessionKey: scope.sessionKey,
             },
             $setOnInsert: {
               normalizedQuery,
@@ -467,8 +465,6 @@ router.post("/validate", async (req, res) => {
               coordinates: responsePayload.location,
               raw: match,
               lastAccessedAt: new Date(),
-              ownerUserId: scope.ownerUserId,
-              sessionKey: scope.sessionKey,
             },
             $setOnInsert: {
               normalizedQuery,
