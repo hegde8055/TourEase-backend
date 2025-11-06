@@ -60,34 +60,6 @@ const RESERVED_STATIC_MAP_KEYS = new Set([
   "provider",
 ]);
 
-// Distance/routing support (Geoapify) — minimal endpoint without new files
-const ensureFetch = async () => {
-  if (!fetchFn) {
-    const { default: nodeFetch } = await import("node-fetch");
-    fetchFn = nodeFetch;
-  }
-  return fetchFn;
-};
-
-const normalizeQuery = (value = "") => value.trim().toLowerCase();
-
-const sessionHeaderNames = ["x-session-key", "x-session-id"];
-
-const getSessionKeyFromRequest = (req) => {
-  for (const headerName of sessionHeaderNames) {
-    const candidate = req.headers?.[headerName];
-    if (typeof candidate === "string" && candidate.trim()) {
-      return candidate.trim();
-    }
-  }
-  return null;
-};
-
-const getCacheScope = (req) => ({
-  ownerUserId: req.user?.userId || null,
-  sessionKey: req.sessionKey || getSessionKeyFromRequest(req),
-});
-
 const buildCacheFilter = (normalizedQuery, scope) => {
   const filter = {};
   if (normalizedQuery) {
@@ -231,11 +203,9 @@ router.post("/geocode", async (req, res) => {
       };
 
       if (scope?.ownerUserId) {
-        cacheUpdate.$set.ownerUserId = scope.ownerUserId;
         cacheUpdate.$setOnInsert.ownerUserId = scope.ownerUserId;
       }
       if (scope?.sessionKey) {
-        cacheUpdate.$set.sessionKey = scope.sessionKey;
         cacheUpdate.$setOnInsert.sessionKey = scope.sessionKey;
       }
 
@@ -325,7 +295,7 @@ router.post("/distance", async (req, res) => {
     const url = new URL("https://api.geoapify.com/v1/routing");
     url.searchParams.set(
       "waypoints",
-      `${fromPoint.lat},${fromPoint.lng}|${toPoint.lat},${toPoint.lng}`
+      `${fromPoint.lng},${fromPoint.lat}|${toPoint.lng},${toPoint.lat}`
     );
     url.searchParams.set("mode", `${mode}`);
     url.searchParams.set("details", "instruction_details,route_details");

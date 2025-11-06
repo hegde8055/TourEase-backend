@@ -148,7 +148,7 @@ router.post("/calculate-route", authenticateToken, async (req, res) => {
       return res.json(cached.data);
     }
 
-    const geoapifyWaypoints = normalizedWaypoints.map((wp) => `${wp.lat},${wp.lng}`).join("|");
+    const geoapifyWaypoints = normalizedWaypoints.map((wp) => `${wp.lng},${wp.lat}`).join("|");
 
     const normalizeRoutePayload = (payload) => {
       if (!payload || typeof payload !== "object") return payload;
