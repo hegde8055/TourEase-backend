@@ -213,31 +213,53 @@ router.post("/geocode", async (req, res) => {
     };
 
     if (normalizedQuery) {
+      const cacheUpdate = {
+        $set: {
+          originalQuery: trimmedQuery,
+          formattedAddress: responsePayload.formattedAddress,
+          city: responsePayload.city,
+          state: responsePayload.state,
+          country: responsePayload.country,
+          coordinates: responsePayload.coordinates,
+          raw: match,
+          lastAccessedAt: new Date(),
+        },
+        $setOnInsert: {
+          normalizedQuery,
+        },
+        $inc: { searchCount: 1 },
+      };
+
+      if (scope?.ownerUserId) {
+        cacheUpdate.$set.ownerUserId = scope.ownerUserId;
+        cacheUpdate.$setOnInsert.ownerUserId = scope.ownerUserId;
+      }
+      if (scope?.sessionKey) {
+        cacheUpdate.$set.sessionKey = scope.sessionKey;
+        cacheUpdate.$setOnInsert.sessionKey = scope.sessionKey;
+      }
+
       try {
-        await DestinationCache.findOneAndUpdate(
-          cacheFilter,
-          {
-            $set: {
-              originalQuery: trimmedQuery,
-              formattedAddress: responsePayload.formattedAddress,
-              city: responsePayload.city,
-              state: responsePayload.state,
-              country: responsePayload.country,
-              coordinates: responsePayload.coordinates,
-              raw: match,
-              lastAccessedAt: new Date(),
-            },
-            $setOnInsert: {
-              normalizedQuery,
-              ownerUserId: scope.ownerUserId,
-              sessionKey: scope.sessionKey,
-            },
-            $inc: { searchCount: 1 },
-          },
-          { upsert: true }
-        );
+        await DestinationCache.findOneAndUpdate(cacheFilter, cacheUpdate, {
+          upsert: true,
+          setDefaultsOnInsert: true,
+        });
       } catch (cacheError) {
-        console.warn("Failed to cache destination geocode", cacheError.message || cacheError);
+        if (cacheError?.code === 11000) {
+          try {
+            await DestinationCache.findOneAndUpdate({ normalizedQuery }, cacheUpdate, {
+              upsert: true,
+              setDefaultsOnInsert: true,
+            });
+          } catch (secondaryError) {
+            console.warn(
+              "Destination cache fallback update failed",
+              secondaryError.message || secondaryError
+            );
+          }
+        } else {
+          console.warn("Failed to cache destination geocode", cacheError.message || cacheError);
+        }
       }
     }
 
@@ -255,51 +277,134 @@ router.post("/distance", async (req, res) => {
     return res.status(400).json({ error: "from {lat,lng} and to {lat,lng} are required" });
   }
   const key = getGeoapifyKey("places");
+  const fromPoint = {
+    lat: Number(from.lat),
+    lng: Number(from.lng ?? from.lon ?? from.longitude),
+  };
+  const toPoint = {
+    lat: Number(to.lat),
+    lng: Number(to.lng ?? to.lon ?? to.longitude),
+  };
+
+  if (
+    !Number.isFinite(fromPoint.lat) ||
+    !Number.isFinite(fromPoint.lng) ||
+    !Number.isFinite(toPoint.lat) ||
+    !Number.isFinite(toPoint.lng)
+  ) {
+    return res.status(400).json({ error: "Invalid coordinate values" });
+  }
+
+  const toRadians = (deg) => (deg * Math.PI) / 180;
+  const haversineMeters = (a, b) => {
+    const R = 6371000;
+    const dLat = toRadians(b.lat - a.lat);
+    const dLng = toRadians(b.lng - a.lng);
+    const lat1 = toRadians(a.lat);
+    const lat2 = toRadians(b.lat);
+    const sinLat = Math.sin(dLat / 2);
+    const sinLng = Math.sin(dLng / 2);
+    const h = sinLat * sinLat + Math.cos(lat1) * Math.cos(lat2) * sinLng * sinLng;
+    return 2 * R * Math.asin(Math.sqrt(Math.max(0, Math.min(1, h))));
+  };
+
+  const defaultSpeeds = {
+    drive: 16.67,
+    "drive+traffic": 13.9,
+    walk: 1.4,
+    bike: 4.5,
+  };
+
+  let providerPayload = null;
+  let distanceMeters = null;
+  let durationSeconds = null;
+  let providerError = null;
+  let usedFallback = false;
+
   try {
     const url = new URL("https://api.geoapify.com/v1/routing");
-    url.searchParams.set("waypoints", `${from.lng},${from.lat}|${to.lng},${to.lat}`);
+    url.searchParams.set(
+      "waypoints",
+      `${fromPoint.lat},${fromPoint.lng}|${toPoint.lat},${toPoint.lng}`
+    );
     url.searchParams.set("mode", `${mode}`);
     url.searchParams.set("details", "instruction_details,route_details");
     url.searchParams.set("apiKey", key);
     const fetch = await ensureFetch();
     const resp = await fetch(url.href);
-    if (!resp.ok) {
-      const text = await resp.text();
-      return res.status(resp.status).json({ error: `Geoapify routing error`, details: text });
-    }
-    const data = await resp.json();
-    const summary = data?.features?.[0]?.properties?.summary || {};
-    const distanceMeters = summary.distance || null;
-    const durationSeconds = summary.duration || null;
 
-    // Persist to itinerary.distanceHistory if itineraryId provided
-    try {
-      if (itineraryId) {
-        const Itinerary = require("../models/Itinerary");
-        const itinerary = await Itinerary.findById(itineraryId);
-        if (itinerary) {
-          itinerary.distanceHistory = itinerary.distanceHistory || [];
-          itinerary.distanceHistory.push({
-            from,
-            to,
-            mode,
-            distanceMeters,
-            durationSeconds,
-            createdAt: new Date(),
-          });
-          itinerary.updatedAt = new Date();
-          await itinerary.save();
-        }
+    if (resp.ok) {
+      const data = await resp.json();
+      providerPayload = data;
+      const feature = data?.features?.[0] || null;
+      const properties = feature?.properties || {};
+      const summary = properties.summary || {};
+
+      const parsedDistance = Number(
+        properties.distance ?? properties.distance_m ?? summary.distance ?? summary.length
+      );
+      const parsedDuration = Number(
+        properties.time ?? properties.time_seconds ?? summary.duration ?? summary.time
+      );
+
+      if (Number.isFinite(parsedDistance) && parsedDistance > 0) {
+        distanceMeters = parsedDistance;
       }
-    } catch (persistError) {
-      console.warn("Persist distance failed:", persistError.message || persistError);
-    }
+      if (Number.isFinite(parsedDuration) && parsedDuration > 0) {
+        durationSeconds = parsedDuration;
+      }
 
-    return res.json({ distanceMeters, durationSeconds, raw: summary });
+      if (!distanceMeters || !durationSeconds) {
+        providerError = "Geoapify response missing distance/time";
+      }
+    } else {
+      providerError = `HTTP ${resp.status}`;
+      const text = await resp.text();
+      providerPayload = text;
+    }
   } catch (error) {
-    console.error("Geoapify distance error:", error);
-    return res.status(500).json({ error: "Failed to compute distance", details: error.message });
+    providerError = error.message;
   }
+
+  if (!distanceMeters || !durationSeconds) {
+    usedFallback = true;
+    distanceMeters = haversineMeters(fromPoint, toPoint);
+    const speed = defaultSpeeds[mode] || defaultSpeeds.drive;
+    durationSeconds = speed > 0 ? distanceMeters / speed : 0;
+  }
+
+  try {
+    if (itineraryId) {
+      const Itinerary = require("../models/Itinerary");
+      const itinerary = await Itinerary.findById(itineraryId);
+      if (itinerary) {
+        itinerary.distanceHistory = itinerary.distanceHistory || [];
+        itinerary.distanceHistory.push({
+          from: fromPoint,
+          to: toPoint,
+          mode,
+          distanceMeters,
+          durationSeconds,
+          providerError,
+          providerPayload,
+          usedFallback,
+          createdAt: new Date(),
+        });
+        itinerary.updatedAt = new Date();
+        await itinerary.save();
+      }
+    }
+  } catch (persistError) {
+    console.warn("Persist distance failed:", persistError.message || persistError);
+  }
+
+  return res.json({
+    distanceMeters,
+    durationSeconds,
+    fallback: usedFallback,
+    providerError,
+    providerPayload,
+  });
 });
 
 const clampNumber = (
