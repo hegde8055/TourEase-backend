@@ -204,9 +204,9 @@ router.post("/calculate-route", authenticateToken, async (req, res) => {
         continue;
       }
 
-  const variantJson = await variantResponse.json();
-  providerPayload = variantJson;
-  const normalized = normalizeRoutePayload(JSON.parse(JSON.stringify(variantJson)));
+      const variantJson = await variantResponse.json();
+      providerPayload = variantJson;
+      const normalized = normalizeRoutePayload(JSON.parse(JSON.stringify(variantJson)));
 
       if (normalized?.features && normalized.features.length > 0) {
         routeData = normalized;
