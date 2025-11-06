@@ -221,11 +221,62 @@ router.post("/calculate-route", authenticateToken, async (req, res) => {
     }
 
     if (!routeData) {
-      return res.status(502).json({
-        error: "No route features found for these waypoints.",
-        providerError,
-        providerPayload,
-      });
+      const toRadians = (deg) => (deg * Math.PI) / 180;
+      const haversineMeters = (a, b) => {
+        const R = 6371000; // meters
+        const dLat = toRadians(b.lat - a.lat);
+        const dLng = toRadians(b.lng - a.lng);
+        const lat1 = toRadians(a.lat);
+        const lat2 = toRadians(b.lat);
+        const sinLat = Math.sin(dLat / 2);
+        const sinLng = Math.sin(dLng / 2);
+        const h = sinLat * sinLat + Math.cos(lat1) * Math.cos(lat2) * sinLng * sinLng;
+        return 2 * R * Math.asin(Math.sqrt(Math.max(0, Math.min(1, h))));
+      };
+
+      const defaultSpeeds = {
+        drive: 16.67, // ≈60 km/h
+        "drive+traffic": 13.9,
+        walk: 1.4,
+        bike: 4.5,
+      };
+
+      const speedMetersPerSecond = defaultSpeeds[mode] || defaultSpeeds.drive;
+
+      let totalMeters = 0;
+      const lineCoords = normalizedWaypoints.map((wp) => [wp.lng, wp.lat]);
+
+      for (let index = 0; index < normalizedWaypoints.length - 1; index += 1) {
+        totalMeters += haversineMeters(normalizedWaypoints[index], normalizedWaypoints[index + 1]);
+      }
+
+      const totalSeconds = speedMetersPerSecond > 0 ? totalMeters / speedMetersPerSecond : 0;
+
+      const fallbackFeature = {
+        type: "Feature",
+        properties: {
+          mode,
+          distance: totalMeters,
+          time: totalSeconds,
+          summary: {
+            distance: totalMeters,
+            duration: totalSeconds,
+          },
+          fallback: true,
+          providerError,
+          providerPayload,
+          waypoints: normalizedWaypoints.map((wp, order) => ({ ...wp, order })),
+        },
+        geometry: {
+          type: "LineString",
+          coordinates: lineCoords,
+        },
+      };
+
+      routeData = {
+        type: "FeatureCollection",
+        features: [fallbackFeature],
+      };
     }
 
     routeCache.set(cacheKey, {
