@@ -60,6 +60,8 @@ const RESERVED_STATIC_MAP_KEYS = new Set([
   "provider",
 ]);
 
+const normalizeQuery = (value = "") => value.trim().toLowerCase();
+
 const buildCacheFilter = (normalizedQuery, scope) => {
   const filter = {};
   if (normalizedQuery) {
