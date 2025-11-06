@@ -70,6 +70,36 @@ const RESERVED_STATIC_MAP_KEYS = new Set([
 
 const normalizeQuery = (value = "") => value.trim().toLowerCase();
 
+const buildQueryVariants = (raw) => {
+  const variants = [];
+  const base = (raw || "").trim();
+  if (!base) return variants;
+
+  variants.push(base);
+
+  const hyphenMatch = base.match(/^(.*?)[-\s]+(\d{5,6})$/);
+  if (hyphenMatch) {
+    const locationPart = hyphenMatch[1].replace(/[-_,]+/g, " ").trim();
+    const pinPart = hyphenMatch[2];
+    if (locationPart) {
+      variants.push(`${locationPart} ${pinPart}`);
+      variants.push(`${locationPart}, ${pinPart}`);
+      variants.push(`${pinPart} ${locationPart}`);
+    }
+  }
+
+  const digitsOnly = base.replace(/[^0-9]/g, "");
+  if (digitsOnly.length === 6 || digitsOnly.length === 5) {
+    const sanitized = base.replace(/[-_,0-9]+/g, " ").trim();
+    if (sanitized) {
+      variants.push(`${sanitized} ${digitsOnly}`);
+      variants.push(`${sanitized}, ${digitsOnly}`);
+    }
+  }
+
+  return Array.from(new Set(variants.filter(Boolean)));
+};
+
 const buildCacheFilter = (normalizedQuery, scope) => {
   const filter = {};
   if (normalizedQuery) {
@@ -182,26 +212,67 @@ router.post("/geocode", async (req, res) => {
           country: cached.country,
           raw: cached.raw,
           cached: true,
+          queryVariantUsed: cached.resolvedQuery || cached.originalQuery || trimmedQuery,
         });
       }
     }
 
     const key = getGeoapifyKey("places");
-    const url = new URL("https://api.geoapify.com/v1/geocode/search");
-    url.searchParams.set("text", trimmedQuery);
-    url.searchParams.set("limit", "1");
-    url.searchParams.set("format", "json");
-    url.searchParams.set("apiKey", key);
     const fetch = await ensureFetch();
-    const resp = await fetch(url.href);
-    if (!resp.ok) {
-      const text = await resp.text();
-      return res.status(resp.status).json({ error: `Geoapify geocode error`, details: text });
+    const variants = buildQueryVariants(trimmedQuery);
+    const attemptErrors = [];
+
+    let match = null;
+    let variantUsed = null;
+
+    for (const variant of variants) {
+      try {
+        const url = new URL("https://api.geoapify.com/v1/geocode/search");
+        url.searchParams.set("text", variant);
+        url.searchParams.set("limit", "1");
+        url.searchParams.set("format", "json");
+        url.searchParams.set("apiKey", key);
+
+        const resp = await fetch(url.href);
+        if (!resp.ok) {
+          const detailText = await resp.text().catch(() => "");
+          attemptErrors.push({
+            variant,
+            status: resp.status,
+            details: detailText?.slice(0, 180) || undefined,
+          });
+
+          if (resp.status === 401 || resp.status === 403 || resp.status >= 500) {
+            return res
+              .status(resp.status)
+              .json({
+                error: "Geoapify geocode error",
+                details: detailText,
+                attempts: attemptErrors,
+              });
+          }
+          continue;
+        }
+
+        const data = await resp.json();
+        const candidate = data?.results?.[0];
+        if (!candidate) {
+          attemptErrors.push({ variant, status: 404, details: "No results returned" });
+          continue;
+        }
+
+        match = candidate;
+        variantUsed = variant;
+        break;
+      } catch (attemptError) {
+        attemptErrors.push({ variant, status: 500, details: attemptError.message });
+      }
     }
-    const data = await resp.json();
-    const match = data?.results?.[0];
+
     if (!match) {
-      return res.status(404).json({ error: "No results found for the query" });
+      return res
+        .status(404)
+        .json({ error: "No results found for the query", attempts: attemptErrors });
     }
 
     const responsePayload = {
@@ -212,6 +283,7 @@ router.post("/geocode", async (req, res) => {
       country: match.country,
       raw: match,
       cached: false,
+      queryVariantUsed: variantUsed,
     };
 
     if (normalizedQuery) {
@@ -225,6 +297,10 @@ router.post("/geocode", async (req, res) => {
         raw: match,
         lastAccessedAt: new Date(),
       };
+
+      if (variantUsed && variantUsed !== trimmedQuery) {
+        setFields.resolvedQuery = variantUsed;
+      }
 
       if (scope?.ownerUserId) {
         setFields.ownerUserId = scope.ownerUserId;
