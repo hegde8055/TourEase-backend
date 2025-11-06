@@ -74,6 +74,23 @@ const buildCacheFilter = (normalizedQuery, scope) => {
   return filter;
 };
 
+const sessionHeaderNames = ["x-session-key", "x-session-id"];
+
+const getSessionKeyFromRequest = (req) => {
+  for (const headerName of sessionHeaderNames) {
+    const candidate = req.headers?.[headerName];
+    if (typeof candidate === "string" && candidate.trim()) {
+      return candidate.trim();
+    }
+  }
+  return null;
+};
+
+const getCacheScope = (req) => ({
+  ownerUserId: req.user?.userId || null,
+  sessionKey: req.sessionKey || getSessionKeyFromRequest(req),
+});
+
 const ensureSessionKey = (req, res, next) => {
   const sessionKey = getSessionKeyFromRequest(req);
   if (!sessionKey) {
