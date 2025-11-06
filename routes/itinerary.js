@@ -151,11 +151,12 @@ router.post("/calculate-route", authenticateToken, async (req, res) => {
     const url = new URL("https://api.geoapify.com/v1/routing");
     url.searchParams.set("apiKey", GEOAPIFY_KEY);
     url.searchParams.set("mode", mode);
+    url.searchParams.set("format", "geojson");
 
     const geoapifyWaypoints = normalizedWaypoints.map((wp) => `${wp.lng},${wp.lat}`).join("|");
 
     url.searchParams.set("waypoints", geoapifyWaypoints);
-    url.searchParams.append("details", "route_details");
+    url.searchParams.set("details", "instruction_details,route_details");
 
     const routeResponse = await fetch(url.href, { method: "GET" });
 
@@ -168,6 +169,27 @@ router.post("/calculate-route", authenticateToken, async (req, res) => {
     }
 
     const routeData = await routeResponse.json();
+
+    if (
+      (!routeData.features || routeData.features.length === 0) &&
+      Array.isArray(routeData.results)
+    ) {
+      const fallbackFeatures = routeData.results
+        .map((result) => {
+          const { geometry, ...properties } = result || {};
+          if (!geometry || !geometry.type || !geometry.coordinates) return null;
+          return {
+            type: "Feature",
+            geometry,
+            properties,
+          };
+        })
+        .filter(Boolean);
+
+      if (fallbackFeatures.length) {
+        routeData.features = fallbackFeatures;
+      }
+    }
 
     if (!routeData.features || routeData.features.length === 0) {
       const providerError = routeData.error || routeData.message;
