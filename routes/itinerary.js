@@ -221,6 +221,68 @@ router.post("/calculate-route", authenticateToken, async (req, res) => {
     }
 
     if (!routeData) {
+      const osrmWaypoints = normalizedWaypoints.map((wp) => `${wp.lng},${wp.lat}`).join(";");
+      const osrmProfileMap = {
+        drive: "driving",
+        "drive+traffic": "driving",
+        walk: "walking",
+        bike: "cycling",
+      };
+      const osrmProfile = osrmProfileMap[mode] || "driving";
+      const osrmUrl = new URL(
+        `https://router.project-osrm.org/route/v1/${osrmProfile}/${osrmWaypoints}`
+      );
+      osrmUrl.searchParams.set("overview", "full");
+      osrmUrl.searchParams.set("geometries", "geojson");
+      osrmUrl.searchParams.set("steps", "false");
+
+      try {
+        const osrmResponse = await fetch(osrmUrl.href);
+        if (osrmResponse.ok) {
+          const osrmJson = await osrmResponse.json();
+          const osrmRoute = Array.isArray(osrmJson?.routes) ? osrmJson.routes[0] : null;
+
+          if (osrmJson?.code === "Ok" && osrmRoute?.geometry?.coordinates?.length) {
+            providerPayload = osrmJson;
+            providerError = null;
+            const osrmFeature = {
+              type: "Feature",
+              geometry: osrmRoute.geometry,
+              properties: {
+                provider: "osrm",
+                distance: Number(osrmRoute.distance) || 0,
+                time: Number(osrmRoute.duration) || 0,
+                summary: {
+                  distance: Number(osrmRoute.distance) || 0,
+                  duration: Number(osrmRoute.duration) || 0,
+                },
+                fallback: "osrm",
+                waypoints: normalizedWaypoints.map((wp, order) => ({ ...wp, order })),
+              },
+            };
+
+            routeData = {
+              type: "FeatureCollection",
+              features: [osrmFeature],
+            };
+          } else {
+            providerError = osrmJson?.message || "OSRM route not available";
+            console.warn("OSRM fallback missing route", providerError, {
+              response: osrmJson,
+            });
+          }
+        } else {
+          const osrmText = await osrmResponse.text();
+          providerError = `OSRM HTTP ${osrmResponse.status}: ${osrmText}`;
+          console.warn("OSRM fallback error", providerError);
+        }
+      } catch (osrmError) {
+        providerError = osrmError.message;
+        console.warn("OSRM fallback exception", osrmError);
+      }
+    }
+
+    if (!routeData) {
       const toRadians = (deg) => (deg * Math.PI) / 180;
       const haversineMeters = (a, b) => {
         const R = 6371000; // meters
@@ -262,7 +324,7 @@ router.post("/calculate-route", authenticateToken, async (req, res) => {
             distance: totalMeters,
             duration: totalSeconds,
           },
-          fallback: true,
+          fallback: "haversine",
           providerError,
           providerPayload,
           waypoints: normalizedWaypoints.map((wp, order) => ({ ...wp, order })),
