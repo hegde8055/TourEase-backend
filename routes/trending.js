@@ -85,26 +85,72 @@ router.get("/", async (req, res) => {
 });
 
 // Get single trending destination by ID
+// Get single trending destination by ID (search both collections)
 router.get("/:id", async (req, res) => {
   try {
     const { ObjectId } = require("mongodb");
     const db = req.app.locals.db;
+
+    const destinationsCollection = db.collection("destinations");
     const trendingCollection = db.collection("trending_destinations");
 
-    const destination = await trendingCollection.findOne({
-      _id: new ObjectId(req.params.id),
-    });
+    const id = req.params.id;
+
+    let destination = null;
+
+    // Try to find it in the main destinations collection first
+    try {
+      destination = await destinationsCollection.findOne({
+        _id: new ObjectId(id),
+      });
+    } catch {
+      // fallback if id is not a valid ObjectId (e.g., legacy string)
+      destination = await destinationsCollection.findOne({ _id: id });
+    }
+
+    // Fallback to legacy trending collection if not found
+    if (!destination) {
+      try {
+        destination = await trendingCollection.findOne({
+          $or: [{ _id: new ObjectId(id) }, { destinationId: id }],
+        });
+      } catch {
+        destination = await trendingCollection.findOne({
+          $or: [{ _id: id }, { destinationId: id }],
+        });
+      }
+    }
 
     if (!destination) {
       return res.status(404).json({
         success: false,
-        error: "Trending destination not found",
+        error: "Destination not found",
       });
     }
 
+    // Normalize fields (for frontend compatibility)
+    const normalizedDestination = {
+      _id: destination._id?.toString?.() || destination._id,
+      name: destination.name || "Unknown destination",
+      description: destination.description || destination.details || "",
+      photo: destination.photo || destination.image || destination.imageUrl || null,
+      rating: destination.rating || destination.averageRating || null,
+      formatted_address:
+        destination.formatted_address ||
+        destination.address ||
+        destination.location?.address ||
+        "Address unavailable",
+      location: destination.location || {
+        coordinates: destination.coordinates || null,
+      },
+      state: destination.state || destination.location?.state || null,
+      trendingRank: destination.trendingRank ?? destination.rank ?? null,
+      category: destination.category || destination.type || null,
+    };
+
     res.json({
       success: true,
-      destination,
+      destination: normalizedDestination,
     });
   } catch (error) {
     console.error("Get single trending destination error:", error);
