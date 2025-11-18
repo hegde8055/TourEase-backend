@@ -70,6 +70,8 @@ const RESERVED_STATIC_MAP_KEYS = new Set([
 
 const normalizeQuery = (value = "") => value.trim().toLowerCase();
 
+const escapeRegExp = (value = "") => String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 const buildQueryVariants = (raw) => {
   const variants = [];
   const base = (raw || "").trim();
@@ -243,13 +245,11 @@ router.post("/geocode", async (req, res) => {
           });
 
           if (resp.status === 401 || resp.status === 403 || resp.status >= 500) {
-            return res
-              .status(resp.status)
-              .json({
-                error: "Geoapify geocode error",
-                details: detailText,
-                attempts: attemptErrors,
-              });
+            return res.status(resp.status).json({
+              error: "Geoapify geocode error",
+              details: detailText,
+              attempts: attemptErrors,
+            });
           }
           continue;
         }
@@ -351,6 +351,81 @@ router.post("/geocode", async (req, res) => {
   } catch (error) {
     console.error("Geoapify geocode error:", error);
     return res.status(500).json({ error: "Failed to geocode", details: error.message });
+  }
+});
+
+router.get("/suggest", async (req, res) => {
+  const rawQuery = req.query.query || req.query.q || "";
+  const normalizedPartial = normalizeQuery(rawQuery);
+  const scope = getCacheScope(req);
+  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 8, 1), 20);
+
+  const filter = buildCacheFilter(null, scope);
+  if (normalizedPartial) {
+    filter.normalizedQuery = {
+      $regex: new RegExp(`^${escapeRegExp(normalizedPartial)}`),
+    };
+  }
+
+  try {
+    const docs = await DestinationCache.find(filter)
+      .sort({ lastAccessedAt: -1 })
+      .limit(limit)
+      .lean();
+
+    const seen = new Set();
+    const suggestions = [];
+
+    docs.forEach((doc) => {
+      if (!doc) return;
+      const label =
+        doc.originalQuery || doc.formattedAddress || doc.city || doc.state || doc.country;
+      if (!label) return;
+      const key = label.toLowerCase();
+      if (seen.has(key)) return;
+      seen.add(key);
+      suggestions.push({
+        text: label,
+        formattedAddress: doc.formattedAddress,
+        city: doc.city,
+        state: doc.state,
+        country: doc.country,
+        coordinates: doc.coordinates,
+        searchCount: doc.searchCount,
+        lastSearchedAt: doc.lastAccessedAt,
+      });
+    });
+
+    if (!normalizedPartial && suggestions.length === 0) {
+      const fallbackDocs = await DestinationCache.find({ ownerUserId: { $exists: false } })
+        .sort({ searchCount: -1 })
+        .limit(5)
+        .lean();
+      fallbackDocs.forEach((doc) => {
+        if (!doc) return;
+        const label =
+          doc.originalQuery || doc.formattedAddress || doc.city || doc.state || doc.country;
+        if (!label) return;
+        const key = label.toLowerCase();
+        if (seen.has(key)) return;
+        seen.add(key);
+        suggestions.push({
+          text: label,
+          formattedAddress: doc.formattedAddress,
+          city: doc.city,
+          state: doc.state,
+          country: doc.country,
+          coordinates: doc.coordinates,
+          searchCount: doc.searchCount,
+          lastSearchedAt: doc.lastAccessedAt,
+        });
+      });
+    }
+
+    return res.json({ suggestions });
+  } catch (error) {
+    console.error("Destination suggest error:", error);
+    return res.status(500).json({ error: "Failed to fetch suggestions", details: error.message });
   }
 });
 
