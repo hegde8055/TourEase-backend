@@ -3,6 +3,9 @@ const router = express.Router();
 
 const DestinationCache = require("../models/DestinationCache");
 const { authenticateToken } = require("../middleware/auth");
+const jwt = require("jsonwebtoken");
+
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
 
 let fetchFn = typeof fetch === "function" ? fetch : null;
 
@@ -141,9 +144,6 @@ const ensureSessionKey = (req, res, next) => {
   req.sessionKey = sessionKey;
   next();
 };
-
-router.use(authenticateToken);
-router.use(ensureSessionKey);
 
 const touchDestinationCache = async (docId, originalQuery) => {
   if (!docId) return;
