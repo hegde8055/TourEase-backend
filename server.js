@@ -8,6 +8,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs"); // Needed for password hashing
 const jwt = require("jsonwebtoken"); // Needed for auth and reset tokens
 const fs = require("fs");
+const multer = require("multer");
 const destinationsRouter = require("./routes/destinations");
 const trendingRouter = require("./routes/trending");
 const itineraryRouter = require("./routes/itinerary");
@@ -90,6 +91,33 @@ app.use(
     etag: true,
   })
 );
+
+const profileUploadsDir = path.join(uploadsDir, "profiles");
+if (!fs.existsSync(profileUploadsDir)) {
+  fs.mkdirSync(profileUploadsDir, { recursive: true });
+}
+
+const profileStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, profileUploadsDir),
+  filename: (req, file, cb) => {
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    const extension = path.extname(file.originalname) || ".jpg";
+    const userId = req.user?.userId || "guest";
+    cb(null, `profile-${userId}-${uniqueSuffix}${extension}`);
+  },
+});
+
+const profileUpload = multer({
+  storage: profileStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype && file.mimetype.startsWith("image/")) {
+      cb(null, true);
+      return;
+    }
+    cb(new Error("Only image files are allowed"));
+  },
+});
 
 // --- DATABASE CONNECTION ---
 const MONGO_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/tourease";
@@ -304,44 +332,84 @@ app.put("/api/profile/update", authenticateToken, async (req, res) => {
     res.json({ message: "Profile updated successfully", user });
   } catch (error) {
     if (error.name === "ValidationError") return res.status(400).json({ error: error.message });
+    if (error.code === 11000) {
+      return res.status(400).json({ error: "Username or email already in use" });
+    }
     res.status(500).json({ error: "Failed to update profile" });
   }
 });
 
-app.post("/api/profile/upload-photo", authenticateToken, async (req, res) => {
-  try {
-    const { photo } = req.body;
-    if (!photo) {
-      return res.status(400).json({ error: "No photo data provided." });
+const handleProfileUpload = (req, res, next) => {
+  profileUpload.single("photo")(req, res, (err) => {
+    if (!err) return next();
+    const message = err?.message || "Failed to process upload";
+    if (req.file?.path) {
+      fs.unlink(req.file.path, () => {});
     }
-    const updatedUser = await User.findByIdAndUpdate(
-      req.user.userId,
-      { profile_photo_base64: photo },
-      { new: true }
-    ).select("-password");
+    return res.status(400).json({ error: message });
+  });
+};
 
-    if (!updatedUser) {
+app.post("/api/profile/upload-photo", authenticateToken, handleProfileUpload, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      if (req.file?.path) fs.unlink(req.file.path, () => {});
       return res.status(404).json({ error: "User not found" });
     }
-    res.json({ message: "Profile photo uploaded successfully", user: updatedUser });
+
+    const removeExistingFile = () => {
+      if (!user.profile_photo_url) return;
+      const existingPath = path.join(__dirname, user.profile_photo_url.replace(/^\//, ""));
+      if (fs.existsSync(existingPath)) {
+        fs.unlinkSync(existingPath);
+      }
+    };
+
+    if (req.file) {
+      removeExistingFile();
+      user.profile_photo_url = `/uploads/profiles/${req.file.filename}`;
+      user.profile_photo_base64 = null;
+    } else if (req.body?.photo) {
+      removeExistingFile();
+      user.profile_photo_base64 = req.body.photo;
+      user.profile_photo_url = null;
+    } else {
+      return res.status(400).json({ error: "No photo uploaded" });
+    }
+
+    await user.save();
+    const sanitizedUser = user.toObject();
+    delete sanitizedUser.password;
+    return res.json({ message: "Profile photo uploaded successfully", user: sanitizedUser });
   } catch (error) {
     console.error("Photo upload error:", error);
-    res.status(500).json({ error: "Failed to upload photo." });
+    if (req.file?.path && fs.existsSync(req.file.path)) {
+      fs.unlink(req.file.path, () => {});
+    }
+    return res.status(500).json({ error: "Failed to upload photo." });
   }
 });
 
 app.delete("/api/profile/photo", authenticateToken, async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(
-      req.user.userId,
-      { profile_photo_base64: null },
-      { new: true }
-    ).select("-password");
-
+    const user = await User.findById(req.user.userId);
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    res.json({ message: "Profile photo deleted successfully", user });
+    if (user.profile_photo_url) {
+      const photoPath = path.join(__dirname, user.profile_photo_url.replace(/^\//, ""));
+      if (fs.existsSync(photoPath)) fs.unlinkSync(photoPath);
+      user.profile_photo_url = null;
+    }
+
+    user.profile_photo_base64 = null;
+    await user.save();
+
+    const sanitizedUser = user.toObject();
+    delete sanitizedUser.password;
+    res.json({ message: "Profile photo deleted successfully", user: sanitizedUser });
   } catch (error) {
+    console.error("Delete profile photo error:", error);
     res.status(500).json({ error: "Failed to delete profile photo" });
   }
 });
