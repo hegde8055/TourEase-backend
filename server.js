@@ -311,7 +311,16 @@ app.get("/api/profile", authenticateToken, async (req, res) => {
   try {
     const user = await User.findById(req.user.userId).select("-password");
     if (!user) return res.status(404).json({ error: "User not found" });
-    res.json(user);
+
+    const userPayload = user.toObject();
+    if (userPayload.profile_photo_url) {
+      const photoPath = path.join(__dirname, userPayload.profile_photo_url.replace(/^[\\/]/, ""));
+      if (!fs.existsSync(photoPath)) {
+        userPayload.profile_photo_url = null;
+      }
+    }
+
+    res.json(userPayload);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch profile" });
   }
@@ -369,7 +378,14 @@ app.post("/api/profile/upload-photo", authenticateToken, handleProfileUpload, as
     if (req.file) {
       removeExistingFile();
       user.profile_photo_url = `/uploads/profiles/${req.file.filename}`;
-      user.profile_photo_base64 = null;
+      try {
+        const fileBuffer = fs.readFileSync(req.file.path);
+        const mimeType = req.file.mimetype || "image/jpeg";
+        user.profile_photo_base64 = `data:${mimeType};base64,${fileBuffer.toString("base64")}`;
+      } catch (readError) {
+        console.warn("Failed to cache profile photo as base64", readError);
+        user.profile_photo_base64 = null;
+      }
     } else if (req.body?.photo) {
       removeExistingFile();
       user.profile_photo_base64 = req.body.photo;
