@@ -1,8 +1,9 @@
 // /server/models/User.js
-import mongoose from "mongoose";
-import Joi from "joi";
+const mongoose = require("mongoose");
+const Joi = require("joi");
 
-// --- Mongoose Schema ---
+const generateResetPinValue = () => Math.floor(100000 + Math.random() * 900000).toString();
+
 const userSchema = new mongoose.Schema(
   {
     username: {
@@ -57,13 +58,33 @@ const userSchema = new mongoose.Schema(
         sms: { type: Boolean, default: false },
       },
     },
+    resetPin: {
+      type: String,
+      minlength: 6,
+      maxlength: 6,
+      default: generateResetPinValue,
+    },
+    resetPinIssuedAt: {
+      type: Date,
+      default: Date.now,
+    },
+    resetPinLastUsedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-// --- Joi Validation Schemas ---
+userSchema.statics.generateResetPinValue = generateResetPinValue;
+userSchema.methods.assignNewResetPin = function assignNewResetPin() {
+  this.resetPin = generateResetPinValue();
+  this.resetPinIssuedAt = new Date();
+  return this.resetPin;
+};
+
 const usernameSchema = Joi.string().min(3).max(30).trim();
 const emailSchema = Joi.string().trim().lowercase().email();
 const passwordSchema = Joi.string()
@@ -80,14 +101,19 @@ const signupSchema = Joi.object({
   password: passwordSchema.required(),
 });
 
-export const validateSignup = (payload = {}) =>
-  signupSchema.validate(payload, { abortEarly: false });
+const validateSignup = (payload = {}) => signupSchema.validate(payload, { abortEarly: false });
 
-export const validatePasswordStrength = (password = "") => {
+const validatePasswordStrength = (password = "") => {
   const { error } = passwordSchema.validate(password, { abortEarly: false });
   if (!error) return [];
   return error.details.map((detail) => detail.message);
 };
 
-// --- Mongoose Model ---
-export const User = mongoose.model("User", userSchema);
+const User = mongoose.model("User", userSchema);
+
+module.exports = {
+  User,
+  validateSignup,
+  validatePasswordStrength,
+  generateResetPinValue,
+};

@@ -30,6 +30,33 @@ const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000"; // Needed 
 const SERVER_URL = process.env.SERVER_URL || `http://localhost:${PORT}`;
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
 
+const PIN_RESET_SUCCESS_MESSAGE =
+  "If your email is registered, use your TourEase reset PIN from Profile -> Security to finish resetting your password.";
+const PIN_EMAIL_FALLBACK_MESSAGE =
+  "If your email is registered, you will receive a password reset link.";
+
+const generateResetPin = () => generateResetPinValue();
+const assignFreshResetPin = (userDoc) => {
+  if (!userDoc) return null;
+  if (typeof userDoc.assignNewResetPin === "function") {
+    return userDoc.assignNewResetPin();
+  }
+  userDoc.resetPin = generateResetPin();
+  userDoc.resetPinIssuedAt = new Date();
+  return userDoc.resetPin;
+};
+const ensureResetPinForUser = async (userDoc) => {
+  if (!userDoc) return null;
+  if (!userDoc.resetPin) {
+    assignFreshResetPin(userDoc);
+    await userDoc.save();
+  } else if (!userDoc.resetPinIssuedAt) {
+    userDoc.resetPinIssuedAt = new Date();
+    await userDoc.save();
+  }
+  return userDoc.resetPin;
+};
+
 // --- MIDDLEWARE ---
 const additionalCorsOrigins = (process.env.ADDITIONAL_CORS_ORIGINS || "")
   .split(",")
@@ -133,7 +160,7 @@ mongoose
   .catch((err) => console.error("MongoDB connection error:", err));
 
 // --- MODELS ---
-const { User, validatePasswordStrength } = require("./models/User"); // Make sure User model is imported
+const { User, validatePasswordStrength, generateResetPinValue } = require("./models/User");
 
 // --- AUTHENTICATION MIDDLEWARE ---
 const authenticateToken = (req, res, next) => {
@@ -209,99 +236,131 @@ app.post("/api/signin", async (req, res) => {
 
 // --- NEW: FORGOT PASSWORD ROUTE ---
 app.post("/api/forgot-password", async (req, res) => {
-  const { email } = req.body;
+  const { email, mode } = req.body || {};
 
   if (!email) {
     return res.status(400).json({ error: "Email is required." });
   }
 
+  const normalizedMode = String(mode || "pin").toLowerCase() === "email" ? "email" : "pin";
+
   try {
     const user = await User.findOne({ email });
-    if (!user) {
-      // IMPORTANT: Even if user not found, send a success-like response
-      // This prevents attackers from guessing which emails are registered.
-      console.log(`Password reset requested for non-existent email: ${email}`);
-      return res.json({
-        message: "If your email is registered, you will receive a password reset link.",
-      });
+
+    if (normalizedMode === "pin") {
+      if (user) {
+        await ensureResetPinForUser(user);
+      }
+      return res.json({ message: PIN_RESET_SUCCESS_MESSAGE });
     }
 
-    // --- Password Reset Logic ---
-    // 1. Generate a unique, short-lived reset token
-    const resetToken = jwt.sign(
-      { userId: user.id },
-      JWT_SECRET, // Use your existing JWT secret
-      { expiresIn: "1h" } // Token expires in 1 hour
-    );
+    if (!user) {
+      console.log(`Password reset requested for non-existent email: ${email}`);
+      return res.json({ message: PIN_EMAIL_FALLBACK_MESSAGE });
+    }
 
-    // 2. TODO: Store the resetToken or associate it with the user in the DB (optional but recommended)
-    //    For simplicity, we are not storing it here, but in a real app you might.
-
-    // 3. TODO: Send an email to the user with the reset link
-    //    This part requires an email sending library (like Nodemailer) which is not set up here.
-    //    The link would typically be like: ${CLIENT_URL}/reset-password/${resetToken}
-    console.log(`Password reset token for ${email}: ${resetToken}`); // Log token for now
+    const resetToken = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: "1h" });
+    console.log(`Password reset token for ${email}: ${resetToken}`);
     console.log(`Reset Link (for testing): ${CLIENT_URL}/reset-password/${resetToken}`);
 
-    // --- IMPORTANT ---
-    // In a real application, you would *email* the link containing the resetToken.
-    // DO NOT send the token directly in the API response like this in production!
-
-    res.json({
-      message: "If your email is registered, you will receive a password reset link.",
-      // --- REMOVE THIS IN PRODUCTION ---
-      _development_testing_token: resetToken, // Only for testing since email isn't set up
-      // --- END REMOVE ---
+    return res.json({
+      message: PIN_EMAIL_FALLBACK_MESSAGE,
+      _development_testing_token: resetToken,
     });
   } catch (error) {
     console.error("Forgot password error:", error);
-    res.status(500).json({ error: "Server error during password reset request." });
+    return res.status(500).json({ error: "Server error during password reset request." });
   }
 });
 
 // --- NEW: RESET PASSWORD ROUTE ---
 // This handles the link clicked from the (simulated) email
 app.post("/api/reset-password", async (req, res) => {
-  const { token, newPassword } = req.body;
+  const { token, newPassword } = req.body || {};
 
   if (!token || !newPassword) {
     return res.status(400).json({ error: "Token and new password are required." });
   }
 
+  let decoded;
   try {
-    // 1. Verify the token
-    let decoded;
-    try {
-      decoded = jwt.verify(token, JWT_SECRET);
-    } catch (jwtError) {
-      return res.status(400).json({ error: "Invalid or expired reset token." });
-    }
+    decoded = jwt.verify(token, JWT_SECRET);
+  } catch (jwtError) {
+    return res.status(400).json({ error: "Invalid or expired reset token." });
+  }
 
-    const userId = decoded.userId;
-
-    // 2. Find the user
-    const user = await User.findById(userId);
+  try {
+    const user = await User.findById(decoded.userId);
     if (!user) {
       return res.status(404).json({ error: "User not found." });
     }
 
-    // 3. Hash the new password
+    const strengthErrors = validatePasswordStrength(newPassword);
+    if (strengthErrors.length > 0) {
+      return res.status(400).json({ error: strengthErrors.join(" ") });
+    }
+
+    const isSamePassword = await bcrypt.compare(newPassword, user.password || "");
+    if (isSamePassword) {
+      return res
+        .status(400)
+        .json({ error: "New password must be different from your current password." });
+    }
+
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(newPassword, salt);
-
-    // 4. Update the user's password
-    user.password = hashedPassword;
-    // TODO: Invalidate the token if you stored it in the DB
-
+    user.password = await bcrypt.hash(newPassword, salt);
+    user.resetPinLastUsedAt = new Date();
+    assignFreshResetPin(user);
     await user.save();
 
-    res.json({ message: "Password has been reset successfully." });
+    return res.json({ message: "Password has been reset successfully." });
   } catch (error) {
     console.error("Reset password error:", error);
     if (error.name === "ValidationError") {
       return res.status(400).json({ error: error.message });
     }
-    res.status(500).json({ error: "Server error during password reset." });
+    return res.status(500).json({ error: "Server error during password reset." });
+  }
+});
+
+app.post("/api/reset-password/pin", async (req, res) => {
+  const { email, pin, newPassword } = req.body || {};
+
+  if (!email || !pin || !newPassword) {
+    return res.status(400).json({ error: "Email, PIN, and new password are required." });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user || !user.resetPin || user.resetPin !== pin) {
+      return res.status(400).json({ error: "Invalid email or PIN." });
+    }
+
+    const strengthErrors = validatePasswordStrength(newPassword);
+    if (strengthErrors.length > 0) {
+      return res.status(400).json({ error: strengthErrors.join(" ") });
+    }
+
+    const isSamePassword = await bcrypt.compare(newPassword, user.password || "");
+    if (isSamePassword) {
+      return res
+        .status(400)
+        .json({ error: "New password must be different from your current password." });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    user.resetPinLastUsedAt = new Date();
+    assignFreshResetPin(user);
+    await user.save();
+
+    return res.json({
+      message:
+        "Password has been reset successfully. Sign in with your new password and visit Profile -> Security to view your refreshed reset PIN.",
+    });
+  } catch (error) {
+    console.error("Reset password via PIN error:", error);
+    return res.status(500).json({ error: "Server error during PIN reset." });
   }
 });
 // --- END OF NEW AUTH ROUTES ---
@@ -309,10 +368,14 @@ app.post("/api/reset-password", async (req, res) => {
 // --- PROFILE ROUTES ---
 app.get("/api/profile", authenticateToken, async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId).select("-password");
+    const user = await User.findById(req.user.userId);
     if (!user) return res.status(404).json({ error: "User not found" });
 
+    await ensureResetPinForUser(user);
+
     const userPayload = user.toObject();
+    delete userPayload.password;
+
     if (userPayload.profile_photo_url) {
       const photoPath = path.join(__dirname, userPayload.profile_photo_url.replace(/^[\\/]/, ""));
       if (!fs.existsSync(photoPath)) {
@@ -385,6 +448,28 @@ app.put("/api/profile/change-password", authenticateToken, async (req, res) => {
   } catch (error) {
     console.error("Change password error:", error);
     return res.status(500).json({ error: "Failed to update password. Please try again." });
+  }
+});
+
+app.put("/api/profile/reset-pin", authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const newPin = assignFreshResetPin(user);
+    await user.save();
+
+    return res.json({
+      message: "Reset PIN refreshed successfully.",
+      resetPin: newPin,
+      issuedAt: user.resetPinIssuedAt,
+      lastUsedAt: user.resetPinLastUsedAt,
+    });
+  } catch (error) {
+    console.error("Reset PIN refresh error:", error);
+    return res.status(500).json({ error: "Failed to refresh reset PIN." });
   }
 });
 
