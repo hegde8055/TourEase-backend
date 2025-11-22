@@ -133,7 +133,7 @@ mongoose
   .catch((err) => console.error("MongoDB connection error:", err));
 
 // --- MODELS ---
-const { User } = require("./models/User"); // Make sure User model is imported
+const { User, validatePasswordStrength } = require("./models/User"); // Make sure User model is imported
 
 // --- AUTHENTICATION MIDDLEWARE ---
 const authenticateToken = (req, res, next) => {
@@ -345,6 +345,46 @@ app.put("/api/profile/update", authenticateToken, async (req, res) => {
       return res.status(400).json({ error: "Username or email already in use" });
     }
     res.status(500).json({ error: "Failed to update profile" });
+  }
+});
+
+app.put("/api/profile/change-password", authenticateToken, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body || {};
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: "Current password and new password are required." });
+    }
+
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const isCurrentValid = await bcrypt.compare(currentPassword, user.password || "");
+    if (!isCurrentValid) {
+      return res.status(400).json({ error: "Current password is incorrect." });
+    }
+
+    const strengthErrors = validatePasswordStrength(newPassword);
+    if (strengthErrors.length > 0) {
+      return res.status(400).json({ error: strengthErrors.join(" ") });
+    }
+
+    const isSamePassword = await bcrypt.compare(newPassword, user.password || "");
+    if (isSamePassword) {
+      return res
+        .status(400)
+        .json({ error: "New password must be different from your current password." });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    await user.save();
+
+    return res.json({ message: "Password updated successfully." });
+  } catch (error) {
+    console.error("Change password error:", error);
+    return res.status(500).json({ error: "Failed to update password. Please try again." });
   }
 });
 
