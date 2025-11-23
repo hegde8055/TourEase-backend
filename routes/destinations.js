@@ -590,11 +590,11 @@ router.post("/ingest", async (req, res) => {
     });
     const hotels = await fetchPlaceCollection(coords, PLACE_CATEGORY_MAP.hotels, {
       radius: 20000,
-      limit: 8,
+      limit: 12,
     });
     const restaurants = await fetchPlaceCollection(coords, PLACE_CATEGORY_MAP.restaurants, {
       radius: 12000,
-      limit: 8,
+      limit: 12,
     });
 
     const rankSource =
