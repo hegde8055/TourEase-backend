@@ -78,7 +78,17 @@ const geocode = async (query, options = {}) => {
   if (results.length === 0) return null;
 
   // Prioritize administrative areas over businesses/amenities
-  const priorityTypes = ["city", "state", "country", "county", "state_district", "postcode"];
+  const priorityTypes = [
+    "city",
+    "town",
+    "village",
+    "municipality",
+    "state",
+    "country",
+    "county",
+    "state_district",
+    "postcode",
+  ];
   const bestMatch = results.find((r) => priorityTypes.includes(r.result_type));
 
   return bestMatch || results[0];
