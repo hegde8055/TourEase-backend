@@ -1,5 +1,4 @@
-﻿// /server/server.js
-const express = require("express");
+﻿const express = require("express");
 const cors = require("cors");
 const compression = require("compression");
 const path = require("path");
