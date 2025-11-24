@@ -59,15 +59,29 @@ const fetchJson = async (url) => {
 };
 
 // 📍 Geocode text query → coordinates
-const geocode = async (query) => {
+// 📍 Geocode text query → coordinates (Smart Filter)
+const geocode = async (query, options = {}) => {
   const apiKey = ensureConfigured();
   const url = new URL("https://api.geoapify.com/v1/geocode/search");
   url.searchParams.set("text", query);
-  url.searchParams.set("limit", "1");
+  url.searchParams.set("limit", "5"); // Fetch top 5 to filter
   url.searchParams.set("format", "json");
   url.searchParams.set("apiKey", apiKey);
+
+  if (options.country) {
+    url.searchParams.set("filter", `countrycode:${options.country.toLowerCase()}`);
+  }
+
   const result = await fetchJson(url.href);
-  return result?.results?.[0] || null;
+  const results = result?.results || [];
+
+  if (results.length === 0) return null;
+
+  // Prioritize administrative areas over businesses/amenities
+  const priorityTypes = ["city", "state", "country", "county", "state_district", "postcode"];
+  const bestMatch = results.find((r) => priorityTypes.includes(r.result_type));
+
+  return bestMatch || results[0];
 };
 
 // 🏨 Fetch place details by ID

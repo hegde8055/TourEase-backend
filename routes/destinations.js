@@ -383,7 +383,7 @@ router.post("/ingest", async (req, res) => {
 
     let baseRecord;
     try {
-      baseRecord = await geocode(query);
+      baseRecord = await geocode(query, { country: "in" });
     } catch (error) {
       console.error("Geoapify geocode failed:", error.message || error);
       const status = error.statusCode || 500;
