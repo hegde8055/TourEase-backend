@@ -15,6 +15,7 @@ const itineraryRouter = require("./routes/itinerary");
 const placesRouter = require("./routes/places");
 const chatbotRouter = require("./routes/chatbot");
 const imagesRouter = require("./routes/images");
+const { sendEmail } = require("./utils/email");
 require("dotenv").config();
 
 // --- INITIAL SETUP ---
@@ -260,12 +261,29 @@ app.post("/api/forgot-password", async (req, res) => {
     }
 
     const resetToken = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: "1h" });
-    console.log(`Password reset token for ${email}: ${resetToken}`);
-    console.log(`Reset Link (for testing): ${CLIENT_URL}/reset-password/${resetToken}`);
+    const resetLink = `${CLIENT_URL}/reset-password/${resetToken}`;
+
+    console.log(`Password reset token for ${email}: ${resetToken}`); // Keep for debug
+    
+    // Send email
+    await sendEmail({
+      to: email,
+      subject: "Reset Your TourEase Password",
+      text: `You requested a password reset. Click the link to reset your password: ${resetLink}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; color: #333;">
+          <h2>Password Reset Request</h2>
+          <p>You requested a password reset for your TourEase account.</p>
+          <p>Click the button below to reset your password:</p>
+          <a href="${resetLink}" style="background-color: #d4af37; color: #000; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">Reset Password</a>
+          <p style="margin-top: 20px; font-size: 12px; color: #777;">If you didn't request this, please ignore this email. The link expires in 1 hour.</p>
+        </div>
+      `,
+    });
 
     return res.json({
-      message: PIN_EMAIL_FALLBACK_MESSAGE,
-      _development_testing_token: resetToken,
+      message: "If your email is registered, you will receive a password reset link.",
+      // _development_testing_token: resetToken, // Removed to simulate real prod behavior, check Ethereal logs!
     });
   } catch (error) {
     console.error("Forgot password error:", error);
