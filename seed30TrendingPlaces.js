@@ -36,6 +36,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Agra Fort", distance: "2.5 km" },
       { name: "Fatehpur Sikri", distance: "40 km" },
+      { name: "Mehtab Bagh", distance: "7 km" },
+      { name: "Itmad-ud-Daulah", distance: "6 km" },
+      { name: "Akbar's Tomb", distance: "13 km" },
     ],
     howToReach: "Agra Airport 13 km, Delhi Airport 230 km, Agra Cantt Station 6 km",
     tips: ["Book tickets online", "Visit on weekdays", "No food/tobacco inside", "Carry valid ID"],
@@ -81,6 +84,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Pushkar", distance: "145 km" },
       { name: "Ranthambore", distance: "180 km" },
+      { name: "Ajmer Sharif Dargah", distance: "130 km" },
+      { name: "Bhangarh Fort", distance: "85 km" },
+      { name: "Sariska Tiger Reserve", distance: "110 km" },
     ],
     howToReach: "Jaipur Int'l Airport, Jaipur Railway Station, NH 8 from Delhi 280 km",
     tips: ["Bargain at markets", "Visit Sunday for palace illumination", "Hire audio guide"],
@@ -128,6 +134,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Dudhsagar Falls", distance: "60 km" },
       { name: "Old Goa Churches", distance: "10 km" },
+      { name: "Fort Aguada", distance: "15 km" },
+      { name: "Anjuna Flea Market", distance: "18 km" },
+      { name: "Chapora Fort", distance: "20 km" },
     ],
     howToReach: "Goa Airport Dabolim 30 km, Madgaon Station, NH 66 from Mumbai 580 km",
     tips: [
@@ -179,6 +188,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Sarnath", distance: "10 km" },
       { name: "Chunar Fort", distance: "40 km" },
+      { name: "Ramnagar Fort", distance: "14 km" },
+      { name: "Vindhyachal", distance: "60 km" },
+      { name: "Chandraprabha Sanctuary", distance: "70 km" },
     ],
     howToReach: "Lal Bahadur Shastri Airport 25 km, Varanasi Junction Station",
     tips: [
@@ -230,6 +242,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Munnar", distance: "160 km" },
       { name: "Cochin", distance: "85 km" },
+      { name: "Varkala Beach", distance: "118 km" },
+      { name: "Thekkady", distance: "140 km" },
+      { name: "Marari Beach", distance: "15 km" },
     ],
     howToReach: "Cochin Airport 85 km, Alleppey Station, NH 66",
     tips: [
@@ -283,6 +298,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Pangong Lake", distance: "160 km" },
       { name: "Nubra Valley", distance: "120 km" },
+      { name: "Tso Moriri Lake", distance: "220 km" },
+      { name: "Hemis National Park", distance: "50 km" },
+      { name: "Zanskar Valley", distance: "450 km" },
     ],
     howToReach: "Leh Airport (best), Manali-Leh Highway 475 km, Srinagar-Leh 420 km",
     tips: [
@@ -336,6 +354,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Haridwar", distance: "20 km" },
       { name: "Mussoorie", distance: "75 km" },
+      { name: "Dehradun", distance: "45 km" },
+      { name: "Rajaji National Park", distance: "18 km" },
+      { name: "Tehri Dam", distance: "80 km" },
     ],
     howToReach: "Jolly Grant Airport Dehradun 35 km, Haridwar Station 25 km, Delhi 240 km",
     tips: [
@@ -389,6 +410,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Kalimpong", distance: "50 km" },
       { name: "Gangtok", distance: "98 km" },
+      { name: "Mirik Lake", distance: "49 km" },
+      { name: "Kurseong", distance: "32 km" },
+      { name: "Pelling", distance: "72 km" },
     ],
     howToReach: "Bagdogra Airport 95 km, New Jalpaiguri Station 70 km, Siliguri 70 km",
     tips: [
@@ -443,6 +467,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Havelock Island", distance: "54 km by sea" },
       { name: "Neil Island", distance: "37 km by sea" },
+      { name: "Baratang Island", distance: "100 km" },
+      { name: "Ross Island", distance: "3 km by boat" },
+      { name: "Chidiya Tapu", distance: "25 km" },
     ],
     howToReach: "Port Blair Airport, Ships from Kolkata/Chennai (3-4 days)",
     tips: [
@@ -493,6 +520,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Chamundi Hills", distance: "13 km" },
       { name: "Brindavan Gardens", distance: "21 km" },
+      { name: "Srirangapatna", distance: "15 km" },
+      { name: "Ranganathittu Bird Sanctuary", distance: "16 km" },
+      { name: "Bandipur National Park", distance: "80 km" },
     ],
     howToReach: "Mysore Airport 10 km, Bangalore Airport 170 km, Mysore Station 2 km",
     tips: [
@@ -544,6 +574,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Badami Caves", distance: "140 km" },
       { name: "Pattadakal", distance: "135 km" },
+      { name: "Aihole", distance: "130 km" },
+      { name: "Tungabhadra Dam", distance: "16 km" },
+      { name: "Daroji Bear Sanctuary", distance: "20 km" },
     ],
     howToReach: "Hubli Airport 160 km, Hospet Station 13 km, Bangalore 350 km",
     tips: [
@@ -596,6 +629,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Kumbhalgarh Fort", distance: "85 km" },
       { name: "Chittorgarh", distance: "115 km" },
+      { name: "Ranakpur Jain Temple", distance: "90 km" },
+      { name: "Mount Abu", distance: "160 km" },
+      { name: "Haldighati", distance: "40 km" },
     ],
     howToReach: "Maharana Pratap Airport 22 km, Udaipur City Station, NH 8",
     tips: [
@@ -648,6 +684,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Thekkady", distance: "90 km" },
       { name: "Alleppey", distance: "160 km" },
+      { name: "Eravikulam National Park", distance: "15 km" },
+      { name: "Chinnar Wildlife Sanctuary", distance: "60 km" },
+      { name: "Marayoor", distance: "40 km" },
     ],
     howToReach: "Cochin Airport 110 km, Aluva Station 110 km, Madurai 140 km",
     tips: [
@@ -700,6 +739,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Mysore", distance: "120 km" },
       { name: "Nagarhole", distance: "60 km" },
+      { name: "Golden Temple Bylakuppe", distance: "40 km" },
+      { name: "Talakaveri", distance: "48 km" },
+      { name: "Iruppu Falls", distance: "80 km" },
     ],
     howToReach: "Mangalore Airport 160 km, Mysore Station 120 km, Bangalore 260 km",
     tips: [
@@ -753,6 +795,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Kufri", distance: "16 km" },
       { name: "Manali", distance: "250 km" },
+      { name: "Chail", distance: "45 km" },
+      { name: "Narkanda", distance: "60 km" },
+      { name: "Tattapani", distance: "50 km" },
     ],
     howToReach: "Chandigarh Airport 115 km, Kalka Station (toy train), NH 5 from Chandigarh",
     tips: [
@@ -807,6 +852,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Solang Valley", distance: "14 km" },
       { name: "Rohtang Pass", distance: "51 km" },
+      { name: "Manikaran Sahib", distance: "80 km" },
+      { name: "Naggar Castle", distance: "20 km" },
+      { name: "Kasol", distance: "75 km" },
     ],
     howToReach: "Bhuntar Airport 50 km, Chandigarh 310 km, Delhi 540 km by road",
     tips: [
@@ -858,6 +906,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Wagah Border", distance: "30 km" },
       { name: "Pul Kanjari", distance: "35 km" },
+      { name: "Tarn Taran Sahib", distance: "25 km" },
+      { name: "Harike Wetland", distance: "60 km" },
+      { name: "Goindwal Sahib", distance: "45 km" },
     ],
     howToReach: "Amritsar Airport 11 km, Amritsar Junction Station, NH 1 from Delhi 450 km",
     tips: [
@@ -909,6 +960,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Panna National Park", distance: "30 km" },
       { name: "Raneh Falls", distance: "20 km" },
+      { name: "Orchha", distance: "170 km" },
+      { name: "Pandav Falls", distance: "35 km" },
+      { name: "Kalinjar Fort", distance: "100 km" },
     ],
     howToReach: "Khajuraho Airport well connected, Khajuraho Station, Jhansi 175 km",
     tips: [
@@ -953,6 +1007,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Bibi Ka Maqbara", distance: "30 km from Ellora" },
       { name: "Daulatabad Fort", distance: "15 km" },
+      { name: "Grishneshwar Temple", distance: "1 km from Ellora" },
+      { name: "Aurangabad Caves", distance: "30 km" },
+      { name: "Lonar Crater Lake", distance: "140 km" },
     ],
     howToReach: "Aurangabad Airport 30 km, Aurangabad Station, Ajanta 100 km, Ellora 30 km",
     tips: [
@@ -1006,6 +1063,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Majuli Island", distance: "150 km" },
       { name: "Pobitora Wildlife Sanctuary", distance: "48 km" },
+      { name: "Panbari Reserve Forest", distance: "10 km" },
+      { name: "Kakochang Waterfalls", distance: "15 km" },
+      { name: "Hoollongapar Gibbon Sanctuary", distance: "80 km" },
     ],
     howToReach: "Jorhat Airport 97 km, Furkating Station 75 km, Guwahati 217 km",
     tips: [
@@ -1059,6 +1119,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Mandvi Beach", distance: "85 km" },
       { name: "Dholavira", distance: "220 km" },
+      { name: "Narayan Sarovar", distance: "150 km" },
+      { name: "Kalo Dungar", distance: "90 km" },
+      { name: "Kutch Bustard Sanctuary", distance: "100 km" },
     ],
     howToReach: "Bhuj Airport 80 km, Bhuj Station 85 km, Ahmedabad 400 km",
     tips: [
@@ -1111,6 +1174,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Hemkund Sahib", distance: "6 km trek" },
       { name: "Badrinath", distance: "25 km from Govindghat" },
+      { name: "Mana Village", distance: "28 km from Govindghat" },
+      { name: "Auli", distance: "30 km from Govindghat" },
+      { name: "Joshimath", distance: "20 km from Govindghat" },
     ],
     howToReach: "Jolly Grant Airport 295 km, Haridwar 273 km, Trek from Govindghat (base)",
     tips: [
@@ -1165,6 +1231,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Kolkata", distance: "110 km" },
       { name: "Sajnekhali", distance: "Base for tours" },
+      { name: "Bakkhali", distance: "60 km" },
+      { name: "Henry's Island", distance: "65 km" },
+      { name: "Sagardwip", distance: "80 km" },
     ],
     howToReach: "Kolkata Airport 110 km, Canning Station 48 km, Boat from Godkhali/Sonakhali",
     tips: [
@@ -1217,6 +1286,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Puri", distance: "35 km" },
       { name: "Chandrabhaga Beach", distance: "3 km" },
+      { name: "Chilika Lake", distance: "70 km" },
+      { name: "Pipli", distance: "45 km" },
+      { name: "Raghurajpur Heritage Village", distance: "40 km" },
     ],
     howToReach: "Bhubaneswar Airport 65 km, Puri Station 35 km, Well connected by road",
     tips: [
@@ -1268,6 +1340,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Thirumalai Nayak Palace", distance: "2 km" },
       { name: "Gandhi Museum", distance: "5 km" },
+      { name: "Rameswaram", distance: "170 km" },
+      { name: "Kodaikanal", distance: "115 km" },
+      { name: "Chettinad", distance: "90 km" },
     ],
     howToReach: "Madurai Airport 10 km, Madurai Junction Station 2 km, Well connected by road",
     tips: [
@@ -1320,6 +1395,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Taj Mahal", distance: "2.5 km" },
       { name: "Itmad-ud-Daulah", distance: "7 km" },
+      { name: "Fatehpur Sikri", distance: "40 km" },
+      { name: "Sikandra", distance: "15 km" },
+      { name: "Mehtab Bagh", distance: "8 km" },
     ],
     howToReach: "Agra Airport 13 km, Agra Cantt Station 6 km, Same as Taj Mahal",
     tips: [
@@ -1372,6 +1450,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Chandni Chowk", distance: "Adjacent" },
       { name: "Jama Masjid", distance: "500 m" },
+      { name: "India Gate", distance: "6 km" },
+      { name: "Qutub Minar", distance: "15 km" },
+      { name: "Humayun's Tomb", distance: "8 km" },
     ],
     howToReach: "Chandni Chowk Metro, New Delhi Station 6 km, IGI Airport 20 km",
     tips: [
@@ -1423,6 +1504,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Elephanta Caves", distance: "Ferry 1 hour" },
       { name: "Colaba Causeway", distance: "Walking" },
+      { name: "Marine Drive", distance: "3 km" },
+      { name: "Chhatrapati Shivaji Terminus", distance: "2 km" },
+      { name: "Juhu Beach", distance: "25 km" },
     ],
     howToReach: "CST Station 3 km, Mumbai Airport 26 km, Churchgate Metro 2 km",
     tips: [
@@ -1475,6 +1559,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Udayagiri Caves", distance: "60 km" },
       { name: "Bhopal", distance: "46 km" },
+      { name: "Bhimbetka Rock Shelters", distance: "90 km" },
+      { name: "Vidisha", distance: "10 km" },
+      { name: "Raisen Fort", distance: "25 km" },
     ],
     howToReach: "Bhopal Airport 55 km, Bhopal Station 46 km, Sanchi Station 1 km",
     tips: [
@@ -1528,6 +1615,9 @@ const top30TrendingDestinations = [
     nearbyAttractions: [
       { name: "Chennai", distance: "60 km" },
       { name: "Pondicherry", distance: "105 km" },
+      { name: "Kanchipuram", distance: "65 km" },
+      { name: "Vedanthangal Bird Sanctuary", distance: "50 km" },
+      { name: "Covelong Beach", distance: "20 km" },
     ],
     howToReach: "Chennai Airport 60 km, Chengalpattu Station 29 km, ECR from Chennai",
     tips: [
