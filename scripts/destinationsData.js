@@ -1,7 +1,8 @@
 const destinations = [
   {
     name: "Taj Mahal",
-    image: "https://upload.wikimedia.org/wikipedia/commons/1/1d/Taj_Mahal_in_March_2004.jpg",
+    image:
+      "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSxIpmZZCuhBToZ8D0c6sN05VYt7HGVz3dLFRIyXgpieinHTfsE7wqwWuavZ6bbB-7kWIL_btkKSDrkqmJOu015pUTe2VhioqTwCgI7TznpF40XPxw6wHv8YRz_pcKWRYJmcJ_s=s1360-w1360-h1020-rw",
     location: { city: "Agra", state: "Uttar Pradesh", country: "India" },
     description:
       "The Taj Mahal is an ivory-white marble mausoleum, built by Mughal emperor Shah Jahan in memory of his wife Mumtaz Mahal.",
@@ -39,7 +40,8 @@ const destinations = [
   },
   {
     name: "Goa Beaches",
-    image: "https://upload.wikimedia.org/wikipedia/commons/e/e6/1_Beach%2C_Goa_India%2C_March_2013.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/e/e6/1_Beach%2C_Goa_India%2C_March_2013.jpg",
     location: { city: "Goa", state: "Goa", country: "India" },
     description:
       "Goa is renowned for pristine beaches, vibrant nightlife, Portuguese heritage, and laid-back atmosphere.",
@@ -153,7 +155,8 @@ const destinations = [
   },
   {
     name: "Andaman Islands",
-    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Havelock_Island%2C_Radhanagar_Beach%2C_Andaman_Islands.jpg/1280px-Havelock_Island%2C_Radhanagar_Beach%2C_Andaman_Islands.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Havelock_Island%2C_Radhanagar_Beach%2C_Andaman_Islands.jpg/1280px-Havelock_Island%2C_Radhanagar_Beach%2C_Andaman_Islands.jpg",
     location: { city: "Port Blair", state: "Andaman", country: "India" },
     description:
       "Tropical islands with pristine beaches, turquoise waters, coral reefs, and rich marine life.",
@@ -302,7 +305,8 @@ const destinations = [
   },
   {
     name: "Pondicherry",
-    image: "https://upload.wikimedia.org/wikipedia/commons/2/29/Beach_Promenade%2C_Pondicherry%2C_India.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/2/29/Beach_Promenade%2C_Pondicherry%2C_India.jpg",
     location: { city: "Pondicherry", state: "Puducherry", country: "India" },
     description:
       "Former French colony with distinct French Quarter, promenade, and spiritual Auroville.",
@@ -321,7 +325,8 @@ const destinations = [
   },
   {
     name: "Shillong",
-    image: "https://upload.wikimedia.org/wikipedia/commons/d/d7/Elephant_Falls_-_Shillong_Meghalaya.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/d/d7/Elephant_Falls_-_Shillong_Meghalaya.jpg",
     location: { city: "Shillong", state: "Meghalaya", country: "India" },
     description:
       "Scotland of the East, known for rolling hills, waterfalls, and vibrant music scene.",
@@ -340,7 +345,8 @@ const destinations = [
   },
   {
     name: "Rann of Kutch",
-    image: "https://upload.wikimedia.org/wikipedia/commons/e/e0/White_salt_desert_at_Rann_of_Kutch.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/e/e0/White_salt_desert_at_Rann_of_Kutch.jpg",
     location: { city: "Kutch", state: "Gujarat", country: "India" },
     description: "World's largest salt desert, famous for the Rann Utsav and white salt plains.",
     nearbyAttractions: [
@@ -358,7 +364,8 @@ const destinations = [
   },
   {
     name: "Kolkata",
-    image: "https://upload.wikimedia.org/wikipedia/commons/e/e4/Victoria_Memorial_Kolkata_at_night.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/e/e4/Victoria_Memorial_Kolkata_at_night.jpg",
     location: { city: "Kolkata", state: "West Bengal", country: "India" },
     description: "City of Joy, famous for colonial architecture, literature, and street food.",
     nearbyAttractions: [
@@ -466,7 +473,8 @@ const destinations = [
   },
   {
     name: "Gangtok",
-    image: "https://upload.wikimedia.org/wikipedia/commons/e/e0/MG_Marg_Gangtok%2C_Sikkim_New_Year_Eve_2011.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/e/e0/MG_Marg_Gangtok%2C_Sikkim_New_Year_Eve_2011.jpg",
     location: { city: "Gangtok", state: "Sikkim", country: "India" },
     description: "Capital of Sikkim, known for cleanliness, Kanchenjunga views, and monasteries.",
     nearbyAttractions: [
@@ -520,7 +528,8 @@ const destinations = [
   },
   {
     name: "Gir National Park",
-    image: "https://upload.wikimedia.org/wikipedia/commons/5/5f/Asiatic_Male_Lion_in_Gir_Forest_National_Park.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/5/5f/Asiatic_Male_Lion_in_Gir_Forest_National_Park.jpg",
     location: { city: "Sasan Gir", state: "Gujarat", country: "India" },
     description: "The only natural habitat of Asiatic Lions in the world.",
     nearbyAttractions: [
