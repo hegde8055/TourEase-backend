@@ -548,7 +548,7 @@ const destinations = [
   {
     name: "Gir National Park",
     image:
-      "https://upload.wikimedia.org/wikipedia/commons/5/5f/Asiatic_Male_Lion_in_Gir_Forest_National_Park.jpg",
+      "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSyy9wp3u4LKFPahn4EMOWIZwLRF6_IWkvPRHqkHGlzx4QdAUv5fUISmLRWaUmFIJvXC2KZlDQVEjFwiE65sU8qxVlDMEPnzrVeDSS0Ohjky9HuFIk1aQolw7bD2LKxdNnyBCzZI=s1360-w1360-h1020-rw",
     location: { city: "Sasan Gir", state: "Gujarat", country: "India" },
     description: "The only natural habitat of Asiatic Lions in the world.",
     nearbyAttractions: [
@@ -566,7 +566,8 @@ const destinations = [
   },
   {
     name: "Sundarbans National Park",
-    image: "https://upload.wikimedia.org/wikipedia/commons/3/3e/Sunderbans_tiger.jpg",
+    image:
+      "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSz4L0Mncx0ZsdxIUPPVJ4QrqspF8WccDzfTHjL4vtiddESwfOXB9gYCCyshZdzEJJ9kN3iIUqf-ddjZ-NXYPGKYoYdVvADLm55XrP1v0nlQCKbtwPd_G5Z3EKjkfBMuU_-uXKo=s1360-w1360-h1020-rw",
     location: { city: "Sundarbans", state: "West Bengal", country: "India" },
     description: "World's largest mangrove forest and home to Royal Bengal Tigers.",
     nearbyAttractions: [
