@@ -81,7 +81,7 @@ const destinations = [
   {
     name: "Kerala Backwaters",
     image:
-      "https://www.google.com/imgres?q=Kerala%20backwaters&imgurl=https%3A%2F%2Fwww.tripsavvy.com%2Fthmb%2FUoylMLyzOBPdDp34ForEiJd9m3s%3D%2F1500x0%2Ffilters%3Ano_upscale()%3Amax_bytes(150000)%3Astrip_icc()%2FGettyImages-522478216-5ab12c4e3de4230036949cee.jpg&imgrefurl=https%3A%2F%2Fwww.tripsavvy.com%2Fhow-to-visit-kerala-backwaters-1539470&docid=_76AAfOOHNyR7M&tbnid=OxbHehAq9KQZ4M&vet=12ahUKEwjyh93Jy42RAxUASWwGHX-7AHUQM3oECBYQAA..i&w=1500&h=1000&hcb=2&ved=2ahUKEwjyh93Jy42RAxUASWwGHX-7AHUQM3oECBYQAA",
+      "https://www.google.com/imgres?q=kerala%20backwaters&imgurl=https%3A%2F%2Fwww.jacadatravel.com%2F_next%2Fimage%2F%3Furl%3Dhttps%253A%252F%252Fcdn.jacadatravel.com%252Fwp-content%252Fuploads%252Fbis-images%252F470032%252FKerala-AdobeStock_164621341-2-1600x900-f50_50.jpg%26w%3D3840%26q%3D100&imgrefurl=https%3A%2F%2Fwww.jacadatravel.com%2Findian-subcontinent%2Findia%2Fkeralan-backwaters%2F&docid=I7JWfNlSKIWFGM&tbnid=fN692fa7UtJkbM&vet=12ahUKEwiwlcOq0I2RAxW-na8BHRv1AB4QM3oECE4QAA..i&w=1600&h=900&hcb=2&ved=2ahUKEwiwlcOq0I2RAxW-na8BHRv1AB4QM3oECE4QAA",
     location: { city: "Alleppey", state: "Kerala", country: "India" },
     description:
       "A network of interconnected canals, rivers, lakes, and inlets along Kerala's coast, famous for houseboats.",
@@ -415,7 +415,7 @@ const destinations = [
   {
     name: "Tirupati",
     image:
-      "https://www.google.com/imgres?q=Tirupati&imgurl=https%3A%2F%2Fstatic.toiimg.com%2Fthumb%2Fimgsize-23456%2Cmsid-117096573%2Cwidth-600%2Cresizemode-4%2F117096573.jpg&imgrefurl=https%3A%2F%2Ftimesofindia.indiatimes.com%2Flife-style%2Ftravel%2Fdestinations%2Fa-quick-guide-to-tirupati-how-to-reach-it-where-to-stay-and-what-to-see-and-do%2Farticleshow%2F117095878.cms&docid=TCMVOVfJjo2BXM&tbnid=0RVtuI4bQGtz3M&vet=12ahUKEwi3tPbDzY2RAxWdTmwGHfD3Dj8QM3oECB8QAA..i&w=600&h=450&hcb=2&ved=2ahUKEwi3tPbDzY2RAxWdTmwGHfD3Dj8QM3oECB8QAA",
+      "https://www.google.com/imgres?q=tirupati&imgurl=https%3A%2F%2Fcdn.britannica.com%2F22%2F156222-050-BEE18768%2FSri-Venkateswara-Swamy-Temple-Tirumala-Tirupati-India.jpg&imgrefurl=https%3A%2F%2Fwww.britannica.com%2Fplace%2FTirupati&docid=RdaNDruvJsxUuM&tbnid=-G9lEaiu4bXVZM&vet=12ahUKEwi3rsKl0I2RAxVvaPUHHWwxBFsQM3oECCkQAA..i&w=1000&h=750&hcb=2&ved=2ahUKEwi3rsKl0I2RAxVvaPUHHWwxBFsQM3oECCkQAA",
     location: { city: "Tirupati", state: "Andhra Pradesh", country: "India" },
     description: "Home to the world-renowned Tirumala Venkateswara Temple.",
     nearbyAttractions: [
