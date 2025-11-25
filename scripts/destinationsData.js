@@ -1,7 +1,7 @@
 const destinations = [
   {
     name: "Taj Mahal",
-    image: "https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800",
+    image: "https://upload.wikimedia.org/wikipedia/commons/1/1d/Taj_Mahal_in_March_2004.jpg",
     location: { city: "Agra", state: "Uttar Pradesh", country: "India" },
     description:
       "The Taj Mahal is an ivory-white marble mausoleum, built by Mughal emperor Shah Jahan in memory of his wife Mumtaz Mahal.",
@@ -20,7 +20,7 @@ const destinations = [
   },
   {
     name: "Jaipur - The Pink City",
-    image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800",
+    image: "https://upload.wikimedia.org/wikipedia/commons/d/d2/Hawa_Mahal_2011.jpg",
     location: { city: "Jaipur", state: "Rajasthan", country: "India" },
     description:
       "Jaipur is known as the Pink City due to its distinctively colored buildings. Famous for stunning palaces, forts, and bazaars.",
@@ -39,7 +39,7 @@ const destinations = [
   },
   {
     name: "Goa Beaches",
-    image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800",
+    image: "https://upload.wikimedia.org/wikipedia/commons/e/e6/1_Beach%2C_Goa_India%2C_March_2013.jpg",
     location: { city: "Goa", state: "Goa", country: "India" },
     description:
       "Goa is renowned for pristine beaches, vibrant nightlife, Portuguese heritage, and laid-back atmosphere.",
@@ -58,7 +58,7 @@ const destinations = [
   },
   {
     name: "Varanasi (Kashi)",
-    image: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=800",
+    image: "https://upload.wikimedia.org/wikipedia/commons/e/e0/Varanasi_Munshi_Ghat3.jpg",
     location: { city: "Varanasi", state: "Uttar Pradesh", country: "India" },
     description:
       "Varanasi is the spiritual capital of India, famous for ghats, temples, and the Ganga Aarti.",
@@ -77,7 +77,7 @@ const destinations = [
   },
   {
     name: "Kerala Backwaters",
-    image: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=800",
+    image: "https://upload.wikimedia.org/wikipedia/commons/a/a7/Kerala_backwater.jpg",
     location: { city: "Alleppey", state: "Kerala", country: "India" },
     description:
       "A network of interconnected canals, rivers, lakes, and inlets along Kerala's coast, famous for houseboats.",
@@ -96,7 +96,7 @@ const destinations = [
   },
   {
     name: "Ladakh - Land of High Passes",
-    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800",
+    image: "https://upload.wikimedia.org/wikipedia/commons/e/e0/Blue_Pangong_lake_ladakh.jpg",
     location: { city: "Leh", state: "Ladakh", country: "India" },
     description:
       "High-altitude desert with stunning landscapes, Buddhist monasteries, and pristine lakes.",
@@ -115,7 +115,7 @@ const destinations = [
   },
   {
     name: "Rishikesh - Yoga Capital",
-    image: "https://images.unsplash.com/photo-1596021688656-35fdc9ed0274?w=800", // Correct Rishikesh image
+    image: "https://upload.wikimedia.org/wikipedia/commons/2/27/Rishikesh%27s_ganga.jpg",
     location: { city: "Rishikesh", state: "Uttarakhand", country: "India" },
     description:
       "Spiritual town in Himalayan foothills on Ganges River, known for yoga, temples, and adventure sports.",
@@ -134,7 +134,7 @@ const destinations = [
   },
   {
     name: "Darjeeling - Queen of Hills",
-    image: "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=800",
+    image: "https://upload.wikimedia.org/wikipedia/commons/f/f6/Kanchenjunga_from_Darjeeling.jpg",
     location: { city: "Darjeeling", state: "West Bengal", country: "India" },
     description:
       "Picturesque hill station famous for tea plantations, Kanchenjunga views, and the Toy Train.",
@@ -153,7 +153,7 @@ const destinations = [
   },
   {
     name: "Andaman Islands",
-    image: "https://images.unsplash.com/photo-1589330273594-fade1ee91647?w=800",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Havelock_Island%2C_Radhanagar_Beach%2C_Andaman_Islands.jpg/1280px-Havelock_Island%2C_Radhanagar_Beach%2C_Andaman_Islands.jpg",
     location: { city: "Port Blair", state: "Andaman", country: "India" },
     description:
       "Tropical islands with pristine beaches, turquoise waters, coral reefs, and rich marine life.",
@@ -172,7 +172,7 @@ const destinations = [
   },
   {
     name: "Mysore Palace",
-    image: "https://images.unsplash.com/photo-1581873372798-8eb29bbd65bd?w=800",
+    image: "https://upload.wikimedia.org/wikipedia/commons/e/e4/Mysore_palace_illuminated.jpg",
     location: { city: "Mysore", state: "Karnataka", country: "India" },
     description: "Magnificent Indo-Saracenic palace, one of India's most visited monuments.",
     nearbyAttractions: [
@@ -190,7 +190,7 @@ const destinations = [
   },
   {
     name: "Hampi",
-    image: "https://images.unsplash.com/photo-1602491676819-3fe09c7e3831?w=800",
+    image: "https://upload.wikimedia.org/wikipedia/commons/3/38/Virupaksha_Temple_-_Hampi_03.jpg",
     location: { city: "Hampi", state: "Karnataka", country: "India" },
     description:
       "UNESCO World Heritage Site with ruins of Vijayanagara Empire. Ancient temples and massive boulders.",
@@ -209,7 +209,7 @@ const destinations = [
   },
   {
     name: "Udaipur - City of Lakes",
-    image: "https://images.unsplash.com/photo-1580055733199-07e48814c6dc?w=800",
+    image: "https://upload.wikimedia.org/wikipedia/commons/e/ee/Pichola_Lake%2C_Udaipur.jpg",
     location: { city: "Udaipur", state: "Rajasthan", country: "India" },
     description:
       "Romantic city with beautiful palaces, lakes, and havelis. Known as Venice of the East.",
@@ -228,7 +228,7 @@ const destinations = [
   },
   {
     name: "Munnar",
-    image: "https://images.unsplash.com/photo-1591012911216-f639a4d102b9?w=800",
+    image: "https://upload.wikimedia.org/wikipedia/commons/2/2f/Tea_Gardens_in_Munnar.jpg",
     location: { city: "Munnar", state: "Kerala", country: "India" },
     description:
       "Picturesque hill station in Western Ghats, famous for tea plantations and misty mountains.",
@@ -247,7 +247,7 @@ const destinations = [
   },
   {
     name: "Coorg",
-    image: "https://images.unsplash.com/photo-1541411438265-4cb4687110e9?w=800",
+    image: "https://upload.wikimedia.org/wikipedia/commons/f/fe/Greenery_of_coorg.jpg",
     location: { city: "Coorg", state: "Karnataka", country: "India" },
     description:
       "Scotland of India, known for coffee plantations, lush green hills, and waterfalls.",
@@ -266,7 +266,7 @@ const destinations = [
   },
   {
     name: "Srinagar",
-    image: "https://images.unsplash.com/photo-1566837945700-30057527ade0?w=800",
+    image: "https://upload.wikimedia.org/wikipedia/commons/e/ea/Shikara_Dal_Lake.jpg",
     location: { city: "Srinagar", state: "Jammu & Kashmir", country: "India" },
     description: "Famous for Dal Lake, houseboats, Mughal gardens, and stunning Himalayan views.",
     nearbyAttractions: [
@@ -284,7 +284,7 @@ const destinations = [
   },
   {
     name: "Manali",
-    image: "https://images.unsplash.com/photo-1605640840605-14ac1855827b?w=800",
+    image: "https://upload.wikimedia.org/wikipedia/commons/e/e0/Solang_Valley_Manali.JPG",
     location: { city: "Manali", state: "Himachal Pradesh", country: "India" },
     description: "High-altitude Himalayan resort town, gateway for adventure sports and Ladakh.",
     nearbyAttractions: [
@@ -302,7 +302,7 @@ const destinations = [
   },
   {
     name: "Pondicherry",
-    image: "https://images.unsplash.com/photo-1582555610519-56608825a33f?w=800",
+    image: "https://upload.wikimedia.org/wikipedia/commons/2/29/Beach_Promenade%2C_Pondicherry%2C_India.jpg",
     location: { city: "Pondicherry", state: "Puducherry", country: "India" },
     description:
       "Former French colony with distinct French Quarter, promenade, and spiritual Auroville.",
@@ -321,7 +321,7 @@ const destinations = [
   },
   {
     name: "Shillong",
-    image: "https://images.unsplash.com/photo-1583912268188-5ff02bcfbf6e?w=800",
+    image: "https://upload.wikimedia.org/wikipedia/commons/d/d7/Elephant_Falls_-_Shillong_Meghalaya.jpg",
     location: { city: "Shillong", state: "Meghalaya", country: "India" },
     description:
       "Scotland of the East, known for rolling hills, waterfalls, and vibrant music scene.",
@@ -340,7 +340,7 @@ const destinations = [
   },
   {
     name: "Rann of Kutch",
-    image: "https://images.unsplash.com/photo-1601650613222-b26132aec6e0?w=800",
+    image: "https://upload.wikimedia.org/wikipedia/commons/e/e0/White_salt_desert_at_Rann_of_Kutch.jpg",
     location: { city: "Kutch", state: "Gujarat", country: "India" },
     description: "World's largest salt desert, famous for the Rann Utsav and white salt plains.",
     nearbyAttractions: [
@@ -358,7 +358,7 @@ const destinations = [
   },
   {
     name: "Kolkata",
-    image: "https://images.unsplash.com/photo-1558431382-27e303142255?w=800",
+    image: "https://upload.wikimedia.org/wikipedia/commons/e/e4/Victoria_Memorial_Kolkata_at_night.jpg",
     location: { city: "Kolkata", state: "West Bengal", country: "India" },
     description: "City of Joy, famous for colonial architecture, literature, and street food.",
     nearbyAttractions: [
@@ -376,7 +376,7 @@ const destinations = [
   },
   {
     name: "Ooty",
-    image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800",
+    image: "https://upload.wikimedia.org/wikipedia/commons/e/e3/The_ooty_lake.jpg",
     location: { city: "Ooty", state: "Tamil Nadu", country: "India" },
     description: "Queen of Hill Stations in Nilgiris, famous for botanical gardens and toy train.",
     nearbyAttractions: [
@@ -394,7 +394,7 @@ const destinations = [
   },
   {
     name: "Tirupati",
-    image: "https://images.unsplash.com/photo-1623945205686-21443657c688?w=800",
+    image: "https://upload.wikimedia.org/wikipedia/commons/4/4e/Tirumala_090615.jpg",
     location: { city: "Tirupati", state: "Andhra Pradesh", country: "India" },
     description: "Home to the world-renowned Tirumala Venkateswara Temple.",
     nearbyAttractions: [
@@ -412,7 +412,7 @@ const destinations = [
   },
   {
     name: "Khajuraho",
-    image: "https://images.unsplash.com/photo-1605447957288-727974301e05?w=800",
+    image: "https://upload.wikimedia.org/wikipedia/commons/e/e6/Khajuraho_Temples%2C_MP.jpg",
     location: { city: "Khajuraho", state: "Madhya Pradesh", country: "India" },
     description: "Famous for stunning temples adorned with intricate and erotic rock carvings.",
     nearbyAttractions: [
@@ -430,7 +430,7 @@ const destinations = [
   },
   {
     name: "Jaisalmer",
-    image: "https://images.unsplash.com/photo-1588416936097-41850ab3d86d?w=800",
+    image: "https://upload.wikimedia.org/wikipedia/commons/a/ae/Jaisalmer_Fort%2C_India.jpg",
     location: { city: "Jaisalmer", state: "Rajasthan", country: "India" },
     description: "Golden City famous for its yellow sandstone architecture and living fort.",
     nearbyAttractions: [
@@ -448,7 +448,7 @@ const destinations = [
   },
   {
     name: "Amritsar",
-    image: "https://images.unsplash.com/photo-1587595431973-160d0d94add1?w=800",
+    image: "https://upload.wikimedia.org/wikipedia/commons/e/e4/Amritsar_Golden_Temple_3.JPG",
     location: { city: "Amritsar", state: "Punjab", country: "India" },
     description: "Spiritual heart of Sikhism, home to the Golden Temple and Wagah Border.",
     nearbyAttractions: [
@@ -466,7 +466,7 @@ const destinations = [
   },
   {
     name: "Gangtok",
-    image: "https://images.unsplash.com/photo-1578564969230-9407328326b1?w=800",
+    image: "https://upload.wikimedia.org/wikipedia/commons/e/e0/MG_Marg_Gangtok%2C_Sikkim_New_Year_Eve_2011.jpg",
     location: { city: "Gangtok", state: "Sikkim", country: "India" },
     description: "Capital of Sikkim, known for cleanliness, Kanchenjunga views, and monasteries.",
     nearbyAttractions: [
@@ -484,7 +484,7 @@ const destinations = [
   },
   {
     name: "Kodaikanal",
-    image: "https://images.unsplash.com/photo-1591012911216-f639a4d102b9?w=800",
+    image: "https://upload.wikimedia.org/wikipedia/commons/e/e4/Top_View_of_Kodai_Lake.jpg",
     location: { city: "Kodaikanal", state: "Tamil Nadu", country: "India" },
     description: "Princess of Hills, centered around a star-shaped lake.",
     nearbyAttractions: [
@@ -502,7 +502,7 @@ const destinations = [
   },
   {
     name: "Nainital",
-    image: "https://images.unsplash.com/photo-1569399320677-7c64c7855322?w=800", // Changed to a different image to avoid duplicate with Rishikesh
+    image: "https://upload.wikimedia.org/wikipedia/commons/6/6e/Nainital_Lake_Top_View.jpg",
     location: { city: "Nainital", state: "Uttarakhand", country: "India" },
     description: "Lake District of India, built around the mango-shaped Naini Lake.",
     nearbyAttractions: [
@@ -520,7 +520,7 @@ const destinations = [
   },
   {
     name: "Gir National Park",
-    image: "https://images.unsplash.com/photo-1564760055775-d63b17a55c44?w=800",
+    image: "https://upload.wikimedia.org/wikipedia/commons/5/5f/Asiatic_Male_Lion_in_Gir_Forest_National_Park.jpg",
     location: { city: "Sasan Gir", state: "Gujarat", country: "India" },
     description: "The only natural habitat of Asiatic Lions in the world.",
     nearbyAttractions: [
@@ -538,7 +538,7 @@ const destinations = [
   },
   {
     name: "Sundarbans National Park",
-    image: "https://images.unsplash.com/photo-1534234828563-025317354318?w=800",
+    image: "https://upload.wikimedia.org/wikipedia/commons/3/3e/Sunderbans_tiger.jpg",
     location: { city: "Sundarbans", state: "West Bengal", country: "India" },
     description: "World's largest mangrove forest and home to Royal Bengal Tigers.",
     nearbyAttractions: [
