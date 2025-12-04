@@ -763,15 +763,14 @@ router.post("/tourist", async (req, res) => {
 
   try {
     const effectiveCategories =
-      categories ||
-      "tourism,entertainment,leisure,natural,cultural,religion,commercial.shopping_mall,catering.restaurant";
-    const effectiveRadius = clampRadius(radius || 10000); // Default 10km
+      categories || "tourism,entertainment,catering,commercial.shopping_mall";
+    const effectiveRadius = clampRadius(radius || 5000); // Reverted to 5km default for safety
 
     const url = new URL("https://api.geoapify.com/v2/places");
     url.searchParams.set("categories", effectiveCategories);
     url.searchParams.set("filter", `circle:${location.lng},${location.lat},${effectiveRadius}`);
     url.searchParams.set("bias", `proximity:${location.lng},${location.lat}`);
-    url.searchParams.set("limit", Math.min(Number(limit) || 30, 60));
+    url.searchParams.set("limit", Math.min(Number(limit) || 20, 50));
     url.searchParams.set("lang", "en");
     url.searchParams.set("apiKey", getGeoapifyKey("places"));
 
