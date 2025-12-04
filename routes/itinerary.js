@@ -343,6 +343,36 @@ router.post("/calculate-route", authenticateToken, async (req, res) => {
       };
     }
 
+    // --- BOSS FIX: Apply "Reality Factor" for Indian Roads ---
+    // Geoapify/OSRM often assume perfect highway conditions.
+    // We apply a 1.5x multiplier to account for traffic, road conditions, and breaks.
+    if (routeData && routeData.features) {
+      const REALITY_MULTIPLIER = 1.5;
+      routeData.features.forEach((feature) => {
+        if (feature.properties) {
+          if (feature.properties.time) {
+            feature.properties.time *= REALITY_MULTIPLIER;
+          }
+          if (feature.properties.summary) {
+            if (feature.properties.summary.duration) {
+              feature.properties.summary.duration *= REALITY_MULTIPLIER;
+            }
+            if (feature.properties.summary.time) {
+              feature.properties.summary.time *= REALITY_MULTIPLIER;
+            }
+          }
+          // Also update legs if present (Geoapify structure)
+          if (Array.isArray(feature.properties.legs)) {
+            feature.properties.legs.forEach((leg) => {
+              if (leg.time) leg.time *= REALITY_MULTIPLIER;
+              if (leg.duration) leg.duration *= REALITY_MULTIPLIER;
+            });
+          }
+        }
+      });
+    }
+    // --- END OF FIX ---
+
     routeCache.set(cacheKey, {
       data: routeData,
       expiresAt: now + ROUTE_CACHE_TTL_MS,
