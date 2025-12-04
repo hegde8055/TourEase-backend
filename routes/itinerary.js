@@ -214,10 +214,12 @@ router.post("/calculate-route", authenticateToken, async (req, res) => {
       }
 
       providerError = normalized?.error || normalized?.message || "No route features";
-      console.warn("Geoapify route variant missing features", providerError, {
-        variant,
-        providerPayload: normalized,
-      });
+      if (!providerError?.includes("unconnected regions")) {
+        console.warn("Geoapify route variant missing features", providerError, {
+          variant,
+          providerPayload: normalized,
+        });
+      }
     }
 
     if (!routeData) {
