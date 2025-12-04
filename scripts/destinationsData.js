@@ -3,7 +3,7 @@ const destinations = [
     name: "Taj Mahal",
     image:
       "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSxIpmZZCuhBToZ8D0c6sN05VYt7HGVz3dLFRIyXgpieinHTfsE7wqwWuavZ6bbB-7kWIL_btkKSDrkqmJOu015pUTe2VhioqTwCgI7TznpF40XPxw6wHv8YRz_pcKWRYJmcJ_s=s1360-w1360-h1020-rw",
-    location: { city: "Agra", state: "Uttar Pradesh", country: "India" },
+    location: { city: "Agra", state: "Uttar Pradesh", country: "India", coordinates: [78.0421, 27.1751] },
     description:
       "The Taj Mahal is an ivory-white marble mausoleum, built by Mughal emperor Shah Jahan in memory of his wife Mumtaz Mahal.",
     nearbyAttractions: [
@@ -22,7 +22,7 @@ const destinations = [
   {
     name: "Jaipur - The Pink City",
     image: "https://static.toiimg.com/thumb/107164817/Jaipur.jpg?width=1200&height=900",
-    location: { city: "Jaipur", state: "Rajasthan", country: "India" },
+    location: { city: "Jaipur", state: "Rajasthan", country: "India", coordinates: [75.7878, 26.9196] },
     description:
       "Jaipur is known as the Pink City due to its distinctively colored buildings. Famous for stunning palaces, forts, and bazaars.",
     nearbyAttractions: [
@@ -42,7 +42,7 @@ const destinations = [
     name: "Goa Beaches",
     image:
       "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSy2T-4vDkV05zZ4YtNbsIQkuDgTQLqBYpe3IarZtPZtdJsE5S7y5Vu_oqs-991usAOm1PYgza8VcguPYd6HXs7La4pCgiZ7sz1NgC32HYFH-w5ampQ9zzar_x_fl-wkZaK27_s=w675-h390-n-k-no",
-    location: { city: "Goa", state: "Goa", country: "India" },
+    location: { city: "Goa", state: "Goa", country: "India", coordinates: [74.1240, 15.2993] },
     description:
       "Goa is renowned for pristine beaches, vibrant nightlife, Portuguese heritage, and laid-back atmosphere.",
     nearbyAttractions: [
@@ -62,7 +62,7 @@ const destinations = [
     name: "Varanasi (Kashi)",
     image:
       "https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcT8qoYxE6WuCGjiPgfRNTXF1FlLTCHkK4UVyoyJhGl8wj5nQrsKX1v19rPyqrjZ1R6cSqvQhfAry8GdzE_pHmVQuZ0&s=19",
-    location: { city: "Varanasi", state: "Uttar Pradesh", country: "India" },
+    location: { city: "Varanasi", state: "Uttar Pradesh", country: "India", coordinates: [83.0104, 25.3167] },
     description:
       "Varanasi is the spiritual capital of India, famous for ghats, temples, and the Ganga Aarti.",
     nearbyAttractions: [
@@ -81,7 +81,7 @@ const destinations = [
   {
     name: "Kerala Backwaters",
     image: "https://unsplash.com/photos/a-body-of-water-surrounded-by-palm-trees-apNgC07gfqs",
-    location: { city: "Alleppey", state: "Kerala", country: "India" },
+    location: { city: "Alleppey", state: "Kerala", country: "India", coordinates: [76.3264, 9.4900] },
     description:
       "A network of interconnected canals, rivers, lakes, and inlets along Kerala's coast, famous for houseboats.",
     nearbyAttractions: [
@@ -101,7 +101,7 @@ const destinations = [
     name: "Ladakh - Land of High Passes",
     image:
       "https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcS4lvKhMN4OdQkB3EICfK6tvgxNDnSdzfFzvWbh9vz3ZcW-gGm7uAxQ1MoElx3NBoBsIohc92r1FFHWTXBwm34rC9A&s=19",
-    location: { city: "Leh", state: "Ladakh", country: "India" },
+    location: { city: "Leh", state: "Ladakh", country: "India", coordinates: [77.5840, 34.1650] },
     description:
       "High-altitude desert with stunning landscapes, Buddhist monasteries, and pristine lakes.",
     nearbyAttractions: [
@@ -121,7 +121,7 @@ const destinations = [
     name: "Rishikesh - Yoga Capital",
     image:
       "https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcQEhbTgpsKgm1pU7d_k0UGJqx8QabKFD9MgA5JNrSjBOQeLud3ZHdyEq0oD6eCt2ctazBrzVwvGEV3Y0f8SquJQqks&s=19",
-    location: { city: "Rishikesh", state: "Uttarakhand", country: "India" },
+    location: { city: "Rishikesh", state: "Uttarakhand", country: "India", coordinates: [78.2926, 30.1078] },
     description:
       "Spiritual town in Himalayan foothills on Ganges River, known for yoga, temples, and adventure sports.",
     nearbyAttractions: [
@@ -141,7 +141,7 @@ const destinations = [
     name: "Darjeeling - Queen of Hills",
     image:
       "https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcTpV_Pg_9GOEqGv86Qqs2uO5neQNkQtPnuUyHP-fSmH3t0qt6WveYq4ytsljSSH1Yy3QDgNKlDJHW0kRunjt8dMnnHA&s=19",
-    location: { city: "Darjeeling", state: "West Bengal", country: "India" },
+    location: { city: "Darjeeling", state: "West Bengal", country: "India", coordinates: [88.2631, 27.0417] },
     description:
       "Picturesque hill station famous for tea plantations, Kanchenjunga views, and the Toy Train.",
     nearbyAttractions: [
@@ -161,7 +161,7 @@ const destinations = [
     name: "Andaman Islands",
     image:
       "https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcRAC52E_JE8jjWGps9xOYF00uJOafIArlyXRZIbjjYb7_AxbntYq-lgqXK-6M9aevYePAPLp-i8BhYMiwe1HxoRqrQ&s=19",
-    location: { city: "Port Blair", state: "Andaman", country: "India" },
+    location: { city: "Port Blair", state: "Andaman", country: "India", coordinates: [92.7500, 11.6667] },
     description:
       "Tropical islands with pristine beaches, turquoise waters, coral reefs, and rich marine life.",
     nearbyAttractions: [
@@ -181,7 +181,7 @@ const destinations = [
     name: "Mysore Palace",
     image:
       "https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcSuq7b2bJxPQwOMfK2gh1eVNlkuru7d3HyGsZTurLM6BEYLmXxbuRrYqFHrIwTF3s6PONnSX1Y8R6cU9_HopDIIlFUx&s=19",
-    location: { city: "Mysore", state: "Karnataka", country: "India" },
+    location: { city: "Mysore", state: "Karnataka", country: "India", coordinates: [76.6548, 12.3039] },
     description: "Magnificent Indo-Saracenic palace, one of India's most visited monuments.",
     nearbyAttractions: [
       { name: "Chamundi Hill", distance: "13 km" },
@@ -200,7 +200,7 @@ const destinations = [
     name: "Hampi",
     image:
       "https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcQ_8bmllUjuB6NCL66IryUEdSEmcT7UGDqpxo2fsWnaUVtCNYmwP9QgJm8tE10HmpLIoBOEaKUtXdXKkGtPxIK4FNQ&s=19",
-    location: { city: "Hampi", state: "Karnataka", country: "India" },
+    location: { city: "Hampi", state: "Karnataka", country: "India", coordinates: [76.4603, 15.3352] },
     description:
       "UNESCO World Heritage Site with ruins of Vijayanagara Empire. Ancient temples and massive boulders.",
     nearbyAttractions: [
@@ -220,7 +220,7 @@ const destinations = [
     name: "Udaipur - City of Lakes",
     image:
       "https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcSOpyumgKVnx5kzfOk0mftrdgZupK_KLizFkdGjtCxzwfp9IJ0faaeFEDOfNRVzEN6huBY-GOiJzy1yMxJLs3hwyvY&s=19",
-    location: { city: "Udaipur", state: "Rajasthan", country: "India" },
+    location: { city: "Udaipur", state: "Rajasthan", country: "India", coordinates: [73.6915, 24.5713] },
     description:
       "Romantic city with beautiful palaces, lakes, and havelis. Known as Venice of the East.",
     nearbyAttractions: [
@@ -240,7 +240,7 @@ const destinations = [
     name: "Munnar",
     image:
       "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSwA6LSbFpCXI-bkP2_H1WI2mXNeJ5FlFa_h2DboHWGv5ACzGkbDxgF3zMQQGuWI8htlxybocEUXXlzG20Jc0ymizgKDyKo-m0Awb8jzBGdLCk13vjtG4Ntu4Pecu4rED6X7BnAd=w675-h390-n-k-no",
-    location: { city: "Munnar", state: "Kerala", country: "India" },
+    location: { city: "Munnar", state: "Kerala", country: "India", coordinates: [77.0597, 10.0892] },
     description:
       "Picturesque hill station in Western Ghats, famous for tea plantations and misty mountains.",
     nearbyAttractions: [
@@ -260,7 +260,7 @@ const destinations = [
     name: "Coorg",
     image:
       "https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcSYXVRIfXaOGdt2Qxv717A4zi7N1eLeo4XCbxZlFGyJyKDc860-V1hH9Pv7oBTCPEiKZwMXW2vpFX00dTbhCoG0mg8G&s=19",
-    location: { city: "Coorg", state: "Karnataka", country: "India" },
+    location: { city: "Coorg", state: "Karnataka", country: "India", coordinates: [75.7397, 12.4208] },
     description:
       "Scotland of India, known for coffee plantations, lush green hills, and waterfalls.",
     nearbyAttractions: [
@@ -280,7 +280,7 @@ const destinations = [
     name: "Srinagar",
     image:
       "https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcSmGP95zaU947n7wiSC1oc2afEDVje1IqWkCoiGhkb1HaBl8a3_PJQAztYN-2nvnTomecCs3qI-S1yMyGY4WuGXaNU&s=19",
-    location: { city: "Srinagar", state: "Jammu & Kashmir", country: "India" },
+    location: { city: "Srinagar", state: "Jammu & Kashmir", country: "India", coordinates: [74.8056, 34.0857] },
     description: "Famous for Dal Lake, houseboats, Mughal gardens, and stunning Himalayan views.",
     nearbyAttractions: [
       { name: "Dal Lake", distance: "0 km" },
@@ -299,7 +299,7 @@ const destinations = [
     name: "Manali",
     image:
       "https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcTKoROBq7Ih5MRq3qE9NwGd4HKBXjXC54cpMnNH-4UDlLCja2guhY-Y4Xs281W_quKFkra1t7JTexHeedswRje5svA&s=19",
-    location: { city: "Manali", state: "Himachal Pradesh", country: "India" },
+    location: { city: "Manali", state: "Himachal Pradesh", country: "India", coordinates: [77.1887, 32.2396] },
     description: "High-altitude Himalayan resort town, gateway for adventure sports and Ladakh.",
     nearbyAttractions: [
       { name: "Hadimba Temple", distance: "2 km" },
@@ -318,7 +318,7 @@ const destinations = [
     name: "Pondicherry",
     image:
       "https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcRGryPItd-amOC6IuSXS3ifO8cqBpS99_F-JrS0mPglhCTgg54pZYBHD6nP7BCSo9PdN17tilo4tPxb-3qqDUmWJUw&s=19",
-    location: { city: "Pondicherry", state: "Puducherry", country: "India" },
+    location: { city: "Pondicherry", state: "Puducherry", country: "India", coordinates: [79.8130, 11.9110] },
     description:
       "Former French colony with distinct French Quarter, promenade, and spiritual Auroville.",
     nearbyAttractions: [
@@ -338,7 +338,7 @@ const destinations = [
     name: "Shillong",
     image:
       "https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcTG60aDUuBMY7Yl9z6yA5sDvdj9hysBHiPpPZRzasMILmoGuDrPiZuHITLq6r6h8a_Tal5znWdEk09Et80PAACHo8Y&s=19",
-    location: { city: "Shillong", state: "Meghalaya", country: "India" },
+    location: { city: "Shillong", state: "Meghalaya", country: "India", coordinates: [91.8831, 25.5689] },
     description:
       "Scotland of the East, known for rolling hills, waterfalls, and vibrant music scene.",
     nearbyAttractions: [
@@ -358,7 +358,7 @@ const destinations = [
     name: "Rann of Kutch",
     image:
       "https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcQ3tOG1zFF3ilTMO_laHu9LkXy7Xlnj46GoRSa8hqEeCPlsFANkdCg3iuGUv_Y3uFZnWL4b-hTVrqa3EtzZEEHE1og&s=19",
-    location: { city: "Kutch", state: "Gujarat", country: "India" },
+    location: { city: "Kutch", state: "Gujarat", country: "India", coordinates: [70.6378, 24.0864] },
     description: "World's largest salt desert, famous for the Rann Utsav and white salt plains.",
     nearbyAttractions: [
       { name: "White Desert", distance: "0 km" },
@@ -377,7 +377,7 @@ const destinations = [
     name: "Kolkata",
     image:
       "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSxKxU3d0iDQDW_6TTxcl-TEbnYv-ItMaZM8OfB6eKeTW9dPBkWEst5M1dM99mhn2kFXYszQoVbiPiHJAGtTE4Y8zmC2qTq4OGbrrjF3dxghKSdthMNJuBlh8A_GHSFEd5gE-I1v=w675-h390-n-k-no",
-    location: { city: "Kolkata", state: "West Bengal", country: "India" },
+    location: { city: "Kolkata", state: "West Bengal", country: "India", coordinates: [88.3639, 22.5726] },
     description: "City of Joy, famous for colonial architecture, literature, and street food.",
     nearbyAttractions: [
       { name: "Victoria Memorial", distance: "2 km" },
@@ -396,7 +396,7 @@ const destinations = [
     name: "Ooty",
     image:
       "https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcRsiBMAq9kNWgq4Bdi4uq6UMjqeoOT_m6MRrIPg8HIo_xTMmFiGB7zf44M-KJatx5cMbjjIA_lmhlZdmqGUr9fLgY0j&s=19",
-    location: { city: "Ooty", state: "Tamil Nadu", country: "India" },
+    location: { city: "Ooty", state: "Tamil Nadu", country: "India", coordinates: [76.6952, 11.4134] },
     description: "Queen of Hill Stations in Nilgiris, famous for botanical gardens and toy train.",
     nearbyAttractions: [
       { name: "Botanical Gardens", distance: "2 km" },
@@ -414,7 +414,7 @@ const destinations = [
   {
     name: "Tirupati",
     image: "https://unsplash.com/photos/a-view-of-the-tirupati-balaji-temple-oMXvqBgpIqw",
-    location: { city: "Tirupati", state: "Andhra Pradesh", country: "India" },
+    location: { city: "Tirupati", state: "Andhra Pradesh", country: "India", coordinates: [79.4236, 13.6355] },
     description: "Home to the world-renowned Tirumala Venkateswara Temple.",
     nearbyAttractions: [
       { name: "Tirumala Temple", distance: "20 km" },
@@ -433,7 +433,7 @@ const destinations = [
     name: "Khajuraho",
     image:
       "https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcQ4GI2R1FnGpWY8hko17NEdDvY36BG2ciFwcYZTTtRc1CoZLEMBobljURUnRoLJ6FNOV1ryrUmPi4PjYyuE63_MCHhy&s=19",
-    location: { city: "Khajuraho", state: "Madhya Pradesh", country: "India" },
+    location: { city: "Khajuraho", state: "Madhya Pradesh", country: "India", coordinates: [79.9335, 24.8481] },
     description: "Famous for stunning temples adorned with intricate and erotic rock carvings.",
     nearbyAttractions: [
       { name: "Western Group of Temples", distance: "1 km" },
@@ -452,7 +452,7 @@ const destinations = [
     name: "Jaisalmer",
     image:
       "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSyrwdGmWgOSzTUGmpNw0nN8LSurweC7_FIVR6a_pndtv-IDmwCgGYNChde4Qju-TkIpG83yaJMXdugqDIM53o5MG_TBDiJBqHI67bnicniPVV9AUKWqXjlaXpAF0AUzTw1yaV8=w675-h390-n-k-no",
-    location: { city: "Jaisalmer", state: "Rajasthan", country: "India" },
+    location: { city: "Jaisalmer", state: "Rajasthan", country: "India", coordinates: [70.9229, 26.9117] },
     description: "Golden City famous for its yellow sandstone architecture and living fort.",
     nearbyAttractions: [
       { name: "Jaisalmer Fort", distance: "0 km" },
@@ -471,7 +471,7 @@ const destinations = [
     name: "Amritsar",
     image:
       "https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcQ2_dPJzwnxGLS6rLOzpVy0nWV29n_JeQHekj1DSP1Tu9paJm2YZqrTp4fmQjrIs74rcBG34MRSLG8trs8m2gquJEs&s=19",
-    location: { city: "Amritsar", state: "Punjab", country: "India" },
+    location: { city: "Amritsar", state: "Punjab", country: "India", coordinates: [74.8600, 31.6400] },
     description: "Spiritual heart of Sikhism, home to the Golden Temple and Wagah Border.",
     nearbyAttractions: [
       { name: "Golden Temple", distance: "0 km" },
@@ -490,7 +490,7 @@ const destinations = [
     name: "Gangtok",
     image:
       "https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcQ0E5w5trotmFiXnnHPqtxLE3GA54Fvz0hA5Qap0RZl_3Tz1wxKVzCCQsX2oMXQW1lbZOvp3ie4uKnT4lDsyqAkRYI&s=19",
-    location: { city: "Gangtok", state: "Sikkim", country: "India" },
+    location: { city: "Gangtok", state: "Sikkim", country: "India", coordinates: [88.6200, 27.3300] },
     description: "Capital of Sikkim, known for cleanliness, Kanchenjunga views, and monasteries.",
     nearbyAttractions: [
       { name: "MG Marg", distance: "0 km" },
@@ -509,7 +509,7 @@ const destinations = [
     name: "Kodaikanal",
     image:
       "https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcSZHDiZsXBW-EP7YaBkcGgi_f8CulJ4JFrXNo8L-E5aAoMEpnASayOiLuiNlgbhs9vzGnatv1thtRPyGVcq8nnTSsc&s=19",
-    location: { city: "Kodaikanal", state: "Tamil Nadu", country: "India" },
+    location: { city: "Kodaikanal", state: "Tamil Nadu", country: "India", coordinates: [77.4800, 10.2300] },
     description: "Princess of Hills, centered around a star-shaped lake.",
     nearbyAttractions: [
       { name: "Kodai Lake", distance: "0 km" },
@@ -528,7 +528,7 @@ const destinations = [
     name: "Nainital",
     image:
       "https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcT4RcsJ-VerUWjLcJK_9bzV-xTUx_k3pMH8vnpKr29HX6djTTPt1IC_iHEF_rljvAACWA7PStfBx2osPZ6ZRyQ_yrM&s=19",
-    location: { city: "Nainital", state: "Uttarakhand", country: "India" },
+    location: { city: "Nainital", state: "Uttarakhand", country: "India", coordinates: [79.4636, 29.3803] },
     description: "Lake District of India, built around the mango-shaped Naini Lake.",
     nearbyAttractions: [
       { name: "Naini Lake", distance: "0 km" },
@@ -547,7 +547,7 @@ const destinations = [
     name: "Gir National Park",
     image:
       "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSyy9wp3u4LKFPahn4EMOWIZwLRF6_IWkvPRHqkHGlzx4QdAUv5fUISmLRWaUmFIJvXC2KZlDQVEjFwiE65sU8qxVlDMEPnzrVeDSS0Ohjky9HuFIk1aQolw7bD2LKxdNnyBCzZI=s1360-w1360-h1020-rw",
-    location: { city: "Sasan Gir", state: "Gujarat", country: "India" },
+    location: { city: "Sasan Gir", state: "Gujarat", country: "India", coordinates: [70.7967, 21.1356] },
     description: "The only natural habitat of Asiatic Lions in the world.",
     nearbyAttractions: [
       { name: "Devalia Safari Park", distance: "12 km" },
@@ -566,7 +566,7 @@ const destinations = [
     name: "Sundarbans National Park",
     image:
       "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSz4L0Mncx0ZsdxIUPPVJ4QrqspF8WccDzfTHjL4vtiddESwfOXB9gYCCyshZdzEJJ9kN3iIUqf-ddjZ-NXYPGKYoYdVvADLm55XrP1v0nlQCKbtwPd_G5Z3EKjkfBMuU_-uXKo=s1360-w1360-h1020-rw",
-    location: { city: "Sundarbans", state: "West Bengal", country: "India" },
+    location: { city: "Sundarbans", state: "West Bengal", country: "India", coordinates: [88.7500, 21.7500] },
     description: "World's largest mangrove forest and home to Royal Bengal Tigers.",
     nearbyAttractions: [
       { name: "Sajnekhali Watch Tower", distance: "0 km" },
